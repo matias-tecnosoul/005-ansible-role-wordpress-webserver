@@ -62,3 +62,15 @@ dist/
 # Ansible dependencies (installed via requirements.yml)
 .ansible-deps/
 geerlingguy.mysql/
+
+# Galaxy development artifacts (keep local only)
+.ansible-deps/
+molecule-env/
+.molecule/
+*.sh
+requirements-dev.txt
+
+# Testing artifacts
+.cache/
+.pytest_cache/
+.tox/

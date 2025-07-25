@@ -1,0 +1,20 @@
+# Files/directories to exclude from Galaxy role distribution
+.github/ export-ignore
+molecule/ export-ignore
+molecule-env/ export-ignore
+.ansible-deps/ export-ignore
+requirements-dev.txt export-ignore
+*.sh export-ignore
+.molecule/ export-ignore
+.cache/ export-ignore
+.gitattributes export-ignore
+
+# Keep only role essentials for Galaxy
+defaults/ export
+handlers/ export  
+meta/ export
+tasks/ export
+templates/ export
+vars/ export
+README.md export
+LICENSE export
