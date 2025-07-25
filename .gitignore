@@ -59,3 +59,6 @@ dist/
 
 # Docker
 .vagrant/
+# Ansible dependencies (installed via requirements.yml)
+.ansible-deps/
+geerlingguy.mysql/
