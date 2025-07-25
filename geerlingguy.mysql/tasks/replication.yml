@@ -12,7 +12,7 @@
     - mysql_replication_role == 'master'
     - mysql_replication_user.name is defined
     - (mysql_replication_master | length) > 0
-  tags: ['skip_ansible_galaxy']
+  tags: [skip_ansible_galaxy]
 
 - name: Check slave replication status.
   mysql_replication:
@@ -25,7 +25,7 @@
   when:
     - mysql_replication_role == 'slave'
     - (mysql_replication_master | length) > 0
-  tags: ['skip_ansible_galaxy']
+  tags: [skip_ansible_galaxy]
 
 # https://github.com/ansible/ansible/issues/82264
 - name: Check master replication status.
@@ -40,7 +40,7 @@
       (slave.Is_Slave is not defined and slave.Is_Replica is not defined and slave is failed)
     - mysql_replication_role == 'slave'
     - (mysql_replication_master | length) > 0
-  tags: ['skip_ansible_galaxy']
+  tags: [skip_ansible_galaxy]
 
 - name: Configure replication on the slave.
   mysql_replication:
@@ -71,4 +71,4 @@
       (slave.Is_Slave is not defined and slave.Is_Replica is not defined and slave is failed)
     - mysql_replication_role == 'slave'
     - (mysql_replication_master | length) > 0
-  tags: ['skip_ansible_galaxy']
+  tags: [skip_ansible_galaxy]

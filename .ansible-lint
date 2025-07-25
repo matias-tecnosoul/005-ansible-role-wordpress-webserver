@@ -11,14 +11,14 @@ exclude_paths:
 
 # Solo ignorar errores de formato menos críticos
 skip_list:
-  - yaml[line-length]              # Líneas largas (URLs, etc.)
-  - name[casing]                   # Capitalización (por ahora)
-  - risky-file-permissions         # Permisos específicos de WordPress
+  - yaml[line-length] # Líneas largas (URLs, etc.)
+  - name[casing] # Capitalización (por ahora)
+  - risky-file-permissions # Permisos específicos de WordPress
 
 # Mantener estos como warnings para mejorar gradualmente
 warn_list:
-  - command-instead-of-shell       # Preferir módulos específicos
-  - deprecated-command-syntax      # Sintaxis deprecated
+  - command-instead-of-shell # Preferir módulos específicos
+  - deprecated-command-syntax # Sintaxis deprecated
 
 # NO ignorar estos (importantes para Galaxy):
 # - ignore-errors                  # Manejo de errores apropiado

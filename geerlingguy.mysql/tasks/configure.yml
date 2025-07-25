@@ -2,7 +2,7 @@
 - name: Get MySQL version
   block:
     - name: Run mysql --version
-      ansible.builtin.command: '{{ mysql_daemon }} --version'
+      ansible.builtin.command: "{{ mysql_daemon }} --version"
       register: mysql_cli_version
       changed_when: false
       check_mode: false
@@ -10,7 +10,8 @@
     - name: Extract MySQL version
       ansible.builtin.set_fact:
         mysql_cli_version: >-
-          {{ (mysql_cli_version.stdout | split(' '))[('mariadb' in (mysql_cli_version.stdout | lower)) | ternary(5, 3)][:-1] }}
+          {{ (mysql_cli_version.stdout | split(' '))[('mariadb' in (mysql_cli_version.stdout | lower)) | ternary(5, 3)][:-1]
+          }}
 
 - name: Copy my.cnf global MySQL configuration.
   ansible.builtin.template:
@@ -18,7 +19,7 @@
     dest: "{{ mysql_config_file }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
     force: "{{ overwrite_global_mycnf }}"
   notify: restart mysql
 
@@ -28,7 +29,7 @@
     state: directory
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
   when: mysql_config_include_files | length
 
 - name: Copy my.cnf override files into include directory.
@@ -37,13 +38,13 @@
     dest: "{{ mysql_config_include_dir }}/{{ item.src | basename }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
     force: "{{ item.force | default(false) }}"
   with_items: "{{ mysql_config_include_files }}"
   notify: restart mysql
 
 - name: Create slow query log file (if configured).
-  ansible.builtin.command: "touch {{ mysql_slow_query_log_file }}"
+  ansible.builtin.command: touch {{ mysql_slow_query_log_file }}
   args:
     creates: "{{ mysql_slow_query_log_file }}"
   when: mysql_slow_query_log_enabled
@@ -54,7 +55,7 @@
     state: directory
     owner: mysql
     group: mysql
-    mode: 0755
+    mode: "0755"
     setype: mysqld_db_t
 
 - name: Set ownership on slow query log file (if configured).
@@ -63,17 +64,17 @@
     state: file
     owner: mysql
     group: "{{ mysql_log_file_group }}"
-    mode: 0640
+    mode: "0640"
   when: mysql_slow_query_log_enabled
 
 - name: Create error log file (if configured).
-  ansible.builtin.command: "touch {{ mysql_log_error }}"
+  ansible.builtin.command: touch {{ mysql_log_error }}
   args:
     creates: "{{ mysql_log_error }}"
   when:
     - mysql_log | default(true)
     - mysql_log_error | default(false)
-  tags: ['skip_ansible_galaxy']
+  tags: [skip_ansible_galaxy]
 
 - name: Set ownership on error log file (if configured).
   ansible.builtin.file:
@@ -81,11 +82,11 @@
     state: file
     owner: mysql
     group: "{{ mysql_log_file_group }}"
-    mode: 0640
+    mode: "0640"
   when:
     - mysql_log | default(true)
     - mysql_log_error | default(false)
-  tags: ['skip_ansible_galaxy']
+  tags: [skip_ansible_galaxy]
 
 - name: Ensure MySQL is started and enabled on boot.
   ansible.builtin.service:

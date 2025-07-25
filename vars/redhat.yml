@@ -6,13 +6,13 @@ webserver_services:
   - httpd
 
 # Usuario y grupo del servidor web
-wordpress_user: "apache"
-wordpress_group: "apache"
+wordpress_user: apache
+wordpress_group: apache
 
 # Directorios específicos
-apache_conf_dir: "/etc/httpd/conf"
-apache_vhost_dir: "/etc/httpd/conf.d"
-php_ini_path: "/etc/php.ini"
+apache_conf_dir: /etc/httpd/conf
+apache_vhost_dir: /etc/httpd/conf.d
+php_ini_path: /etc/php.ini
 
 # Paquetes para Rocky Linux 9 con PHP
 redhat_packages:

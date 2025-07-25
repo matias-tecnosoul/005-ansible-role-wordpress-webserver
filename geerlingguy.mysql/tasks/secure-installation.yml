@@ -2,9 +2,9 @@
 - name: Ensure default user is present.
   mysql_user:
     name: "{{ mysql_user_name }}"
-    host: 'localhost'
+    host: localhost
     password: "{{ mysql_user_password }}"
-    priv: '*.*:ALL,GRANT'
+    priv: "*.*:ALL,GRANT"
     state: present
   no_log: "{{ mysql_hide_passwords }}"
   when: mysql_user_name != mysql_root_username
@@ -12,10 +12,10 @@
 # Has to be after the password assignment, for idempotency.
 - name: Copy user-my.cnf file with password credentials.
   ansible.builtin.template:
-    src: "user-my.cnf.j2"
+    src: user-my.cnf.j2
     dest: "{{ mysql_user_home }}/.my.cnf"
     owner: "{{ mysql_user_name }}"
-    mode: 0600
+    mode: "0600"
   no_log: "{{ mysql_hide_passwords }}"
   when: >
     mysql_user_name != mysql_root_username
@@ -52,8 +52,8 @@
   when:
     - (mysql_install_packages | bool) or mysql_root_password_update
     - ansible_system == "Linux"
-    - (mysql_cli_version is version('8.0.34', '>=') and mysql_daemon == 'mysql') or
-      (mysql_cli_version is version('10.4', '>=') and mysql_daemon == 'mariadb')
+    - (mysql_cli_version is version('8.0.34', '>=') and mysql_daemon == 'mysql') or (mysql_cli_version is 
+      version('10.4', '>=') and mysql_daemon == 'mariadb')
 
 # Note: We do not use mysql_user for this operation, as it doesn't always update
 # the root password correctly. See: https://goo.gl/MSOejW
@@ -68,13 +68,8 @@
   with_items: "{{ mysql_root_hosts.stdout_lines|default([]) }}"
   when:
     - (mysql_install_packages | bool) or mysql_root_password_update
-    - (
-        mysql_daemon == 'mysql' and (
-          mysql_cli_version is version('5.7', '>=') and
-          mysql_cli_version is version('8.4', '<')
-        )
-      ) or
-      (mysql_daemon == 'mariadb' and mysql_cli_version is version('10.4', '<'))
+    - ( mysql_daemon == 'mysql' and ( mysql_cli_version is version('5.7', '>=') and mysql_cli_version is version('8.4', 
+      '<') ) ) or (mysql_daemon == 'mariadb' and mysql_cli_version is version('10.4', '<'))
 
 # Set root password for MySQL < 5.7.x.
 - name: Update MySQL root password for localhost root account (< 5.7.x).
@@ -90,11 +85,11 @@
 # Has to be after the root password assignment, for idempotency.
 - name: Copy .my.cnf file with root password credentials.
   ansible.builtin.template:
-    src: "root-my.cnf.j2"
+    src: root-my.cnf.j2
     dest: "{{ mysql_root_home }}/.my.cnf"
     owner: root
     group: root
-    mode: 0600
+    mode: "0600"
   no_log: "{{ mysql_hide_passwords }}"
   when:
     - mysql_install_packages | bool or mysql_root_password_update
@@ -116,5 +111,5 @@
 
 - name: Remove MySQL test database.
   mysql_db:
-    name: 'test'
+    name: test
     state: absent
