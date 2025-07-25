@@ -1,16 +1,17 @@
 ---
-namespace: tu_usuario_galaxy
+namespace: matias-tecnosoul
 name: wordpress_webserver
 version: 1.0.0
 readme: README.md
 authors:
-  - "Tu Nombre <tu@email.com>"
+  - "Matias TecnoSoul <matias@tecnosoul.coma.r>" 
 description: >-
-  Ansible role for complete WordPress webserver setup with Apache HTTP Server,
-  PHP 8.x (auto-detected by distribution), and MySQL connectivity.
-  Supports Ubuntu, Debian, and Rocky Linux with automated testing via Molecule.
+  Production-ready Ansible role for WordPress webserver with Apache HTTP Server,
+  PHP 8.x auto-detection (Ubuntu 22.04→8.1, Debian 12→8.2, Rocky 9→8.0),
+  and MySQL connectivity. Multi-distribution support with comprehensive
+  Molecule testing and CI/CD integration.
 license:
-  - MIT
+  - GPL-3.0-or-later  
 license_file: LICENSE
 tags:
   - wordpress
@@ -21,9 +22,12 @@ tags:
   - webserver
   - cms
   - lamp
+  - molecule
+  - multi-distro
+  - php8
 dependencies:
   geerlingguy.mysql: ">=5.0.0"
-repository: https://github.com/TU_USUARIO/ansible-role-wordpress-webserver
-documentation: https://github.com/TU_USUARIO/ansible-role-wordpress-webserver
-homepage: https://github.com/TU_USUARIO/ansible-role-wordpress-webserver
-issues: https://github.com/TU_USUARIO/ansible-role-wordpress-webserver/issues
+repository: https://github.com/matias-tecnosoul/005-ansible-role-wordpress-webserver
+documentation: https://github.com/matias-tecnosoul/005-ansible-role-wordpress-webserver/blob/main/README.md
+homepage: https://github.com/matias-tecnosoul/005-ansible-role-wordpress-webserver
+issues: https://github.com/matias-tecnosoul/005-ansible-role-wordpress-webserver/issues

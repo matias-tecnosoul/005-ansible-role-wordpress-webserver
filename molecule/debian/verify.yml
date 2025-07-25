@@ -1,0 +1,89 @@
+---
+- name: Verify Debian
+  hosts: all
+  become: true
+  gather_facts: true
+  
+  tasks:
+    - name: Debug Debian information
+      debug:
+        msg:
+          - "🐧 Testing Debian 12"
+          - "Distribution: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+          - "Expected PHP: 8.2"
+          - "Expected Apache: apache2"
+
+    - name: Check if Apache is running
+      systemd:
+        name: apache2
+        state: started
+        enabled: yes
+      check_mode: true
+      register: apache_status
+      failed_when: apache_status is changed
+
+    - name: Check if MySQL is running
+      systemd:
+        name: mysql
+        state: started
+        enabled: yes
+      check_mode: true
+      register: mysql_status
+      failed_when: mysql_status is changed
+
+    - name: Check PHP version
+      command: php --version
+      register: php_version_output
+      changed_when: false
+      failed_when: php_version_output.rc != 0
+
+    - name: Verify PHP 8.2 is installed
+      assert:
+        that:
+          - "'PHP 8.2' in php_version_output.stdout"
+        fail_msg: "Expected PHP 8.2, got: {{ php_version_output.stdout }}"
+        success_msg: "✅ PHP 8.2 correctly detected: {{ php_version_output.stdout.split()[1] }}"
+
+    - name: Check WordPress directory exists
+      stat:
+        path: /var/www/html/wordpress
+      register: wp_dir
+      failed_when: not wp_dir.stat.exists
+
+    - name: Check wp-config.php exists
+      stat:
+        path: /var/www/html/wordpress/wp-config.php
+      register: wp_config
+      failed_when: not wp_config.stat.exists
+
+    - name: Test HTTP response
+      uri:
+        url: "http://localhost"
+        method: GET
+        status_code: [200, 301, 302, 404]
+        follow_redirects: none
+      register: http_response
+      failed_when: http_response.status not in [200, 301, 302, 404]
+
+    - name: Test database connection
+      mysql_query:
+        login_host: localhost
+        login_user: test_wp_user
+        login_password: test_wp_password
+        login_db: test_wordpress_db
+        query: "SELECT 1 as test_connection"
+      register: db_test
+      failed_when: db_test is failed
+
+    - name: Debian verification summary
+      debug:
+        msg:
+          - "🎉 Debian 12 verification completed successfully!"
+          - "✅ Apache running"
+          - "✅ MySQL accessible"  
+          - "✅ PHP {{ php_version_output.stdout.split()[1] }} installed"
+          - "✅ WordPress files present"
+          - "✅ Database connection working"
+          - "✅ HTTP server responding ({{ http_response.status }})"
+          - "🌐 WordPress: http://localhost:8181"
+          - "🔍 Login: molecule login -s debian"

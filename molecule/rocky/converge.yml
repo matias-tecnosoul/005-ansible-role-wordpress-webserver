@@ -1,0 +1,10 @@
+---
+- name: Converge Rocky
+  hosts: all
+  become: true
+  gather_facts: true
+  
+  tasks:
+    - name: Include webserver role
+      include_role:
+        name: webserver

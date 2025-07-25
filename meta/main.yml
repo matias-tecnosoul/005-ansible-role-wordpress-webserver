@@ -1,29 +1,30 @@
 ---
 galaxy_info:
   role_name: wordpress_webserver
-  namespace: tu_usuario_galaxy
-  author: Tu Nombre
+  namespace: matias-tecnosoul
+  author: Matias TecnoSoul
   description: >-
-    Complete WordPress webserver setup with Apache, PHP 8.x (auto-detected),
-    and MySQL integration. Production-ready with security configurations
-    and comprehensive testing via Molecule.
-  company: Tu Empresa
-  license: MIT
+    Production-ready WordPress webserver with Apache HTTP Server,
+    automatic PHP version detection by distribution (Ubuntu 22.04→PHP 8.1,
+    Debian 12→PHP 8.2, Rocky Linux 9→PHP 8.0), MySQL integration,
+    and comprehensive multi-distribution testing via Molecule.
+  company: TecnoSoul
+  license: GPL-3.0-or-later
   min_ansible_version: "2.12"
   
   platforms:
     - name: Ubuntu
       versions:
-        - jammy    # 22.04
-        - focal    # 20.04
+        - jammy    # 22.04 → PHP 8.1
+        - focal    # 20.04 → PHP 7.4
     - name: Debian
       versions:
-        - bullseye  # 11
-        - bookworm  # 12
+        - bullseye  # 11 → PHP 7.4
+        - bookworm  # 12 → PHP 8.2
     - name: EL
       versions:
         - "8"      # Rocky 8
-        - "9"      # Rocky 9
+        - "9"      # Rocky 9 → PHP 8.0
 
   galaxy_tags:
     - wordpress
@@ -35,6 +36,10 @@ galaxy_info:
     - cms
     - lamp
     - molecule
+    - multi-distro
+    - php8
+    - automation
+    - devops
 
 dependencies:
   - role: geerlingguy.mysql
