@@ -5,6 +5,6 @@
   gather_facts: true
   
   tasks:
-    - name: Include webserver role
-      include_role:
-        name: webserver
+    - name: Include wordpress_webserver role (relative path)
+      ansible.builtin.include_role:
+        name: "{{ playbook_dir | dirname | dirname | basename }}"

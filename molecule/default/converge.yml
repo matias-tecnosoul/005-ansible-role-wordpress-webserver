@@ -1,10 +1,10 @@
 ---
-- name: Converge
+- name: Converge Multi-Distro
   hosts: all
   become: true
   gather_facts: true
   
   tasks:
-    - name: Include wordpress_webserver role
+    - name: Include wordpress_webserver role (relative path)
       ansible.builtin.include_role:
-        name: wordpress_webserver
+        name: "{{ playbook_dir | dirname | dirname | basename }}"

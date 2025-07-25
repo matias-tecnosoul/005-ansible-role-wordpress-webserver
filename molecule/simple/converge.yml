@@ -1,0 +1,25 @@
+---
+- name: Converge Simple
+  hosts: all
+  become: true
+  gather_facts: true
+  
+  tasks:
+    # Importar tareas directamente en lugar de usar el role
+    - name: Include main tasks
+      ansible.builtin.include_tasks: ../../tasks/main.yml
+      vars:
+        # Variables necesarias para el role
+        mysql_root_password: "test_root_password"
+        mysql_databases:
+          - name: "test_wordpress_db"
+            encoding: utf8mb4
+            collation: utf8mb4_unicode_ci
+        mysql_users:
+          - name: "test_wp_user"
+            password: "test_wp_password"
+            priv: "test_wordpress_db.*:ALL"
+        wordpress_domain: "simple-test.local"
+        wordpress_db_name: "test_wordpress_db"
+        wordpress_db_user: "test_wp_user"
+        wordpress_db_password: "test_wp_password"

@@ -1,0 +1,125 @@
+---
+dependency:
+  name: galaxy
+  options:
+    requirements-file: requirements.yml
+
+driver:
+  name: docker
+
+platforms:
+  # Ubuntu 22.04 LTS
+  - name: ubuntu2204-instance
+    image: geerlingguy/docker-ubuntu2204-ansible:latest
+    command: /lib/systemd/systemd
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    published_ports:
+      - "8180:80"
+    groups:
+      - ubuntu_hosts
+      - wordpress_servers
+
+  # Debian 12 Bookworm  
+  - name: debian12-instance
+    image: geerlingguy/docker-debian12-ansible:latest
+    command: /lib/systemd/systemd
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    published_ports:
+      - "8181:80"
+    groups:
+      - debian_hosts
+      - wordpress_servers
+
+  # Rocky Linux 9
+  - name: rocky9-instance
+    image: geerlingguy/docker-rockylinux9-ansible:latest
+    command: /lib/systemd/systemd
+    privileged: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    published_ports:
+      - "8182:80"
+    groups:
+      - rocky_hosts
+      - wordpress_servers
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      callbacks_enabled: profile_tasks,timer
+      stdout_callback: yaml
+      host_key_checking: false
+  inventory:
+    group_vars:
+      all:
+        # Variables MySQL comunes
+        mysql_root_password: "test_root_password"
+        mysql_root_password_update: true
+        mysql_user_password_update: true
+        mysql_enabled_on_startup: true
+        mysql_bind_address: '127.0.0.1'
+        overwrite_global_mycnf: true
+        
+        mysql_databases:
+          - name: "test_wordpress_db"
+            encoding: utf8mb4
+            collation: utf8mb4_unicode_ci
+            state: present
+            
+        mysql_users:
+          - name: "test_wp_user"
+            host: "%"
+            password: "test_wp_password"
+            priv: "test_wordpress_db.*:ALL"
+            state: present
+            update_password: always
+        
+        # Variables WordPress comunes
+        wordpress_db_host: "localhost"
+        wordpress_db_name: "test_wordpress_db"
+        wordpress_db_user: "test_wp_user"
+        wordpress_db_password: "test_wp_password"
+        webserver_type: "apache"
+        wordpress_install_dir: "/var/www/html/wordpress"
+        wordpress_table_prefix: "test_wp_"
+        wordpress_debug: true
+        
+        # WordPress security keys
+        wordpress_auth_key: "test-auth-key-multidistro"
+        wordpress_secure_auth_key: "test-secure-auth-key-multidistro"
+        wordpress_logged_in_key: "test-logged-in-key-multidistro"
+        wordpress_nonce_key: "test-nonce-key-multidistro"
+        wordpress_auth_salt: "test-auth-salt-multidistro"
+        wordpress_secure_auth_salt: "test-secure-auth-salt-multidistro"
+        wordpress_logged_in_salt: "test-logged-in-salt-multidistro"
+        wordpress_nonce_salt: "test-nonce-salt-multidistro"
+    
+    host_vars:
+      ubuntu2204-instance:
+        wordpress_domain: "ubuntu-wordpress.test"
+        expected_php_version: "8.1"
+        expected_apache_service: "apache2"
+        expected_mysql_service: "mysql"
+      
+      debian12-instance:
+        wordpress_domain: "debian-wordpress.test"
+        expected_php_version: "8.2"
+        expected_apache_service: "apache2"
+        expected_mysql_service: "mysql"
+      
+      rocky9-instance:
+        wordpress_domain: "rocky-wordpress.test"
+        expected_php_version: "8.0"
+        expected_apache_service: "httpd"
+        expected_mysql_service: "mysqld"
+
+verifier:
+  name: ansible
