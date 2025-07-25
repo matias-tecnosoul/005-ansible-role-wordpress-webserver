@@ -1,7 +1,7 @@
 ---
 galaxy_info:
-  role_name: wordpress_webserver
   namespace: matias-tecnosoul
+  role_name: wordpress_webserver
   author: Matias TecnoSoul
   description: >-
     Production-ready WordPress webserver with Apache HTTP Server,
@@ -12,6 +12,7 @@ galaxy_info:
   license: GPL-3.0-or-later
   min_ansible_version: "2.12"
   
+  # Plataformas donde funciona el role
   platforms:
     - name: Ubuntu
       versions:
@@ -26,6 +27,7 @@ galaxy_info:
         - "8"      # Rocky 8
         - "9"      # Rocky 9 → PHP 8.0
 
+  # Tags para búsqueda en Galaxy
   galaxy_tags:
     - wordpress
     - web
@@ -36,15 +38,18 @@ galaxy_info:
     - cms
     - lamp
     - molecule
+    - testing
     - multi-distro
     - php8
     - automation
     - devops
 
+# Dependencias del role
 dependencies:
   - role: geerlingguy.mysql
     version: ">=5.0.0"
 
+# Collections que usa el role internamente
 collections:
   - community.mysql
   - community.general

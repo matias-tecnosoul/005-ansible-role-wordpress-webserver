@@ -37,8 +37,51 @@ Production-ready Ansible role for complete WordPress webserver setup with **auto
 
 - **Ansible** >= 2.12
 - **Python** >= 3.8
-- **Docker** (for testing with Molecule)
+- **Docker** >= 20.10 (for testing with Molecule)
 - **Target Systems**: Ubuntu, Debian, Rocky Linux
+
+## 🐳 **Docker Compatibility Fix**
+
+**Important**: Molecule has critical compatibility issues with different Docker versions. We provide a universal fix script:
+
+```bash
+# 1. Clone repository
+git clone https://github.com/matias-tecnosoul/005-ansible-role-wordpress-webserver.git
+cd 005-ansible-role-wordpress-webserver
+
+# 2. Setup Python environment
+python3.11 -m venv molecule-env
+source molecule-env/bin/activate
+pip install -r requirements-dev.txt
+
+# 3. Fix Docker compatibility (CRITICAL STEP)
+chmod +x fix-docker-universal.sh
+./fix-docker-universal.sh
+
+# 4. Install Galaxy dependencies
+ansible-galaxy install -r requirements.yml
+
+# 5. Verify everything works
+molecule list
+molecule test -s ubuntu
+```
+
+### **Why is the Docker fix needed?**
+
+**Different Docker versions require different Python SDK versions:**
+- **Docker 20.10.x** (Ubuntu 22.04) → `docker==6.1.3` 
+- **Docker 25.x-27.x** (Updated systems) → `docker==7.0.0`
+- **Docker 28.x+** (Manjaro/Arch) → `docker==7.0.0` + specific config
+
+**Without this fix**: `Not supported URL scheme http+docker` error prevents Molecule from working.
+
+### **Supported Platforms**
+| Platform | Docker Version | Auto-Config | Status |
+|----------|----------------|-------------|---------|
+| Ubuntu 22.04 | 20.10.x | `stable-lts` | ✅ Perfect |
+| Debian 12 | 20.10.x-24.x | `stable-lts` | ✅ Perfect |
+| Manjaro/Arch | 28.x+ | `bleeding-edge` | ✅ Fixed |
+| CentOS/RHEL | 24.x-27.x | `recent-stable` | ✅ Good |
 
 ## 🏗️ Dependencies
 
@@ -151,24 +194,28 @@ See [`defaults/main.yml`](defaults/main.yml) for all available variables and the
 ## 🧪 Testing
 
 ### Local Testing with Molecule
+
 ```bash
-# Setup development environment
-python -m venv molecule-env
+# 1. Setup development environment
+python3.11 -m venv molecule-env
 source molecule-env/bin/activate
 pip install -r requirements-dev.txt
 
-# Install Galaxy dependencies
+# 2. CRITICAL: Fix Docker compatibility
+./fix-docker-universal.sh
+
+# 3. Install Galaxy dependencies
 ansible-galaxy install -r requirements.yml
 
-# Run multi-distribution testing
+# 4. Run multi-distribution testing
 molecule test
 
-# Test specific distribution
-molecule create
-molecule converge
-molecule verify
-molecule login  # Debug if needed
-molecule destroy
+# 5. Test specific distribution
+molecule create -s ubuntu
+molecule converge -s ubuntu
+molecule verify -s ubuntu
+molecule login -s ubuntu  # Debug if needed
+molecule destroy -s ubuntu
 ```
 
 ### Manual Testing
@@ -226,17 +273,42 @@ roles/wordpress_webserver/
 ├── tasks/             # Main role logic
 ├── templates/         # Jinja2 templates
 ├── vars/              # OS-specific variables
+├── fix-docker-universal.sh  # Docker compatibility fix
 └── README.md          # This file
+```
+
+## 🐛 Troubleshooting
+
+### Docker Compatibility Issues
+```bash
+# Error: "Not supported URL scheme http+docker"
+./fix-docker-universal.sh
+
+# Error: "Permission denied" for Docker
+sudo usermod -aG docker $USER
+newgrep docker  # or logout/login
+```
+
+### Molecule Issues
+```bash
+# Role not found error
+molecule list  # Check if scenarios are detected
+ansible-config dump | grep ROLES_PATH  # Check role paths
+
+# Container creation fails
+docker ps  # Check if Docker daemon is running
+molecule destroy  # Clean up previous containers
 ```
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/my-feature`
-3. Add tests for new functionality
-4. Run the test suite: `molecule test`
-5. Ensure ansible-lint compliance: `ansible-lint .`
-6. Submit a pull request
+3. **Run Docker compatibility fix**: `./fix-docker-universal.sh`
+4. Add tests for new functionality
+5. Run the test suite: `molecule test`
+6. Ensure ansible-lint compliance: `ansible-lint .`
+7. Submit a pull request
 
 ## 📝 License
 
