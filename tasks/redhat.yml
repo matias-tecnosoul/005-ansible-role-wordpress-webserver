@@ -1,0 +1,46 @@
+---
+# Tareas específicas para RedHat/CentOS/Rocky
+
+- name: "Instalar repositorio EPEL"
+  ansible.builtin.dnf:
+    name: epel-release
+    state: present
+  tags: ["packages", "repo"]
+
+- name: "Instalar paquetes necesarios para WordPress"
+  ansible.builtin.dnf:
+    name: "{{ redhat_packages }}"
+    state: present
+  tags: ["packages"]
+
+- name: "Configurar firewall para HTTP/HTTPS"
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    permanent: true
+    state: enabled
+    immediate: true
+  loop:
+    - http
+    - https
+  failed_when: false
+  tags: ["firewall"]
+
+- name: "Configurar SELinux para WordPress (básico)"
+  ansible.posix.seboolean:
+    name: "{{ item }}"
+    state: true
+    persistent: true
+  loop:
+    - httpd_can_network_connect
+    - httpd_can_network_connect_db
+  failed_when: false
+  tags: ["selinux"]
+
+- name: "Crear directorio de WordPress"
+  ansible.builtin.file:
+    path: "{{ wordpress_install_dir }}"
+    state: directory
+    owner: "{{ wordpress_user }}"
+    group: "{{ wordpress_group }}"
+    mode: "0755"
+  tags: ["wordpress", "directories"]

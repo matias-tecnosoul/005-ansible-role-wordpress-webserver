@@ -1,0 +1,30 @@
+<VirtualHost *:80>
+    ServerName {{ wordpress_domain }}
+    DocumentRoot {{ wordpress_install_dir }}
+    
+    <Directory {{ wordpress_install_dir }}>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    
+    # Logs - Diferentes por OS
+    {% if ansible_os_family == "Debian" %}
+    ErrorLog ${APACHE_LOG_DIR}/wordpress_error.log
+    CustomLog ${APACHE_LOG_DIR}/wordpress_access.log combined
+    {% else %}
+    ErrorLog /var/log/httpd/wordpress_error.log
+    CustomLog /var/log/httpd/wordpress_access.log combined
+    {% endif %}
+    
+    # Configuración de seguridad básica
+    <Files wp-config.php>
+        Require all denied
+    </Files>
+    
+    <Directory {{ wordpress_install_dir }}/wp-admin/>
+        <Files admin-ajax.php>
+            Require all granted
+        </Files>
+    </Directory>
+</VirtualHost>

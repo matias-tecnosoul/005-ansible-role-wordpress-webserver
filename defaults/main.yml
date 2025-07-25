@@ -1,0 +1,81 @@
+---
+# roles/webserver/defaults/main.yml
+# Variables por defecto del role webserver
+
+# Configuración general
+webserver_type: "apache"
+wordpress_install_dir: "/var/www/html/wordpress"
+wordpress_user: "www-data"
+wordpress_group: "www-data"
+wordpress_domain: "localhost"
+
+# PHP se detecta automáticamente por distribución
+# php_version: Se configura automáticamente en detect-php-version.yml
+
+# PHP configuración
+php_memory_limit: "256M"
+php_max_execution_time: "300"
+php_upload_max_filesize: "64M"
+php_post_max_size: "64M"
+
+# WordPress configuración básica
+wordpress_version: "latest"
+wordpress_download_url: "https://wordpress.org/wordpress-{{ wordpress_version }}.tar.gz"
+wordpress_temp_dir: "/tmp"
+
+# Base de datos (valores por defecto)
+wordpress_db_host: "localhost"
+wordpress_db_name: "wordpress_db"
+wordpress_db_user: "wordpress_user"
+wordpress_db_password: "wp_password_secure"
+wordpress_table_prefix: "wp_"
+
+# Variables de debug (las que faltan)
+wordpress_debug: false
+wordpress_debug_log: false
+
+# WordPress security keys (valores por defecto)
+wordpress_auth_key: "put your unique phrase here"
+wordpress_secure_auth_key: "put your unique phrase here"
+wordpress_logged_in_key: "put your unique phrase here"
+wordpress_nonce_key: "put your unique phrase here"
+wordpress_auth_salt: "put your unique phrase here"
+wordpress_secure_auth_salt: "put your unique phrase here"
+wordpress_logged_in_salt: "put your unique phrase here"
+wordpress_nonce_salt: "put your unique phrase here"
+
+# Paquetes por distribución (mantener lo existente)
+debian_packages:
+  - apache2
+  - "php{{ php_version }}"
+  - "php{{ php_version }}-mysql"
+  - "php{{ php_version }}-curl"
+  - "php{{ php_version }}-gd"
+  - "php{{ php_version }}-mbstring"
+  - "php{{ php_version }}-xml"
+  - "php{{ php_version }}-soap"
+  - "php{{ php_version }}-intl"
+  - "php{{ php_version }}-zip"
+  - unzip
+  - curl
+
+redhat_packages:
+  - httpd
+  - "php"
+  - "php-mysqlnd"
+  - "php-curl"
+  - "php-gd"
+  - "php-mbstring"
+  - "php-xml"
+  - "php-soap"
+  - "php-intl"
+  - "php-zip"
+  - unzip
+  - curl
+
+# Servicios por distribución
+debian_services:
+  - apache2
+
+redhat_services:
+  - httpd

@@ -1,0 +1,31 @@
+---
+# Variables específicas para Debian/Ubuntu
+# roles/webserver/vars/debian.yml
+
+webserver_services:
+  - apache2
+
+# Usuario y grupo del servidor web
+wordpress_user: "www-data"
+wordpress_group: "www-data"
+
+# Directorios específicos
+apache_conf_dir: "/etc/apache2"
+apache_sites_available: "/etc/apache2/sites-available"
+php_ini_path: "/etc/php/{{ php_version }}/apache2/php.ini"
+
+# Paquetes actualizados para PHP 8.2
+debian_packages:
+  - apache2
+  - "php{{ php_version }}"
+  - "php{{ php_version }}-mysql"
+  - "php{{ php_version }}-curl"
+  - "php{{ php_version }}-gd"
+  - "php{{ php_version }}-mbstring"
+  - "php{{ php_version }}-xml"
+  - "php{{ php_version }}-soap"
+  - "php{{ php_version }}-intl"
+  - "php{{ php_version }}-zip"
+  - unzip
+  - curl
+  - wget

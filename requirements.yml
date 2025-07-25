@@ -1,0 +1,12 @@
+---
+roles:
+  - name: geerlingguy.mysql
+    version: "5.0.2"
+
+collections:
+  - name: community.mysql
+    version: ">=3.5.1"
+  - name: community.general
+    version: ">=5.0.0"
+  - name: ansible.posix
+    version: ">=1.0.0"

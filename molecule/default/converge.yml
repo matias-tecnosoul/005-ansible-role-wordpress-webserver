@@ -1,0 +1,28 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  gather_facts: true
+  
+  tasks:
+    - name: Include wordpress_webserver role
+      include_role:
+        name: wordpress_webserver  # Cambio de nombre
+      vars:
+        wordpress_domain: "test.local"
+        wordpress_db_host: "localhost"
+        wordpress_db_name: "test_wordpress_db"
+        wordpress_db_user: "test_wp_user"
+        wordpress_db_password: "test_wp_password"
+        webserver_type: "apache"
+        wordpress_install_dir: "/var/www/html/wordpress"
+        wordpress_table_prefix: "test_wp_"
+        wordpress_debug: true
+        wordpress_auth_key: "test-key"
+        wordpress_secure_auth_key: "test-secure-key"
+        wordpress_logged_in_key: "test-logged-key"
+        wordpress_nonce_key: "test-nonce-key"
+        wordpress_auth_salt: "test-auth-salt"
+        wordpress_secure_auth_salt: "test-secure-salt"
+        wordpress_logged_in_salt: "test-logged-salt"
+        wordpress_nonce_salt: "test-nonce-salt"

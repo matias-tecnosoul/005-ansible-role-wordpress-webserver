@@ -1,0 +1,52 @@
+<?php
+/**
+ * The base configuration for WordPress
+ *
+ * Generado automáticamente por Ansible
+ */
+
+// ** MySQL settings ** //
+define( 'DB_NAME', '{{ wordpress_db_name }}' );
+define( 'DB_USER', '{{ wordpress_db_user }}' );
+define( 'DB_PASSWORD', '{{ wordpress_db_password }}' );
+define( 'DB_HOST', '{{ wordpress_db_host }}' );
+define( 'DB_CHARSET', 'utf8mb4' );
+define( 'DB_COLLATE', '' );
+
+/**#@+
+ * Authentication Unique Keys and Salts.
+ */
+define( 'AUTH_KEY',         '{{ wordpress_auth_key | default("put your unique phrase here") }}' );
+define( 'SECURE_AUTH_KEY',  '{{ wordpress_secure_auth_key | default("put your unique phrase here") }}' );
+define( 'LOGGED_IN_KEY',    '{{ wordpress_logged_in_key | default("put your unique phrase here") }}' );
+define( 'NONCE_KEY',        '{{ wordpress_nonce_key | default("put your unique phrase here") }}' );
+define( 'AUTH_SALT',        '{{ wordpress_auth_salt | default("put your unique phrase here") }}' );
+define( 'SECURE_AUTH_SALT', '{{ wordpress_secure_auth_salt | default("put your unique phrase here") }}' );
+define( 'LOGGED_IN_SALT',   '{{ wordpress_logged_in_salt | default("put your unique phrase here") }}' );
+define( 'NONCE_SALT',       '{{ wordpress_nonce_salt | default("put your unique phrase here") }}' );
+
+/**#@-*/
+
+/**
+ * WordPress Database Table prefix.
+ */
+$table_prefix = '{{ wordpress_table_prefix }}';
+
+/**
+ * For developers: WordPress debugging mode.
+ */
+define( 'WP_DEBUG', {{ wordpress_debug | lower }} );
+{% if wordpress_debug %}
+define( 'WP_DEBUG_LOG', {{ wordpress_debug_log | lower }} );
+define( 'WP_DEBUG_DISPLAY', false );
+{% endif %}
+
+/* That's all, stop editing! Happy publishing. */
+
+/** Absolute path to the WordPress directory. */
+if ( ! defined( 'ABSPATH' ) ) {
+    define( 'ABSPATH', __DIR__ . '/' );
+}
+
+/** Sets up WordPress vars and included files. */
+require_once ABSPATH . 'wp-settings.php';

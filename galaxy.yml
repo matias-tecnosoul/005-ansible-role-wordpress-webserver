@@ -1,0 +1,29 @@
+---
+namespace: tu_usuario_galaxy
+name: wordpress_webserver
+version: 1.0.0
+readme: README.md
+authors:
+  - "Tu Nombre <tu@email.com>"
+description: >-
+  Ansible role for complete WordPress webserver setup with Apache HTTP Server,
+  PHP 8.x (auto-detected by distribution), and MySQL connectivity.
+  Supports Ubuntu, Debian, and Rocky Linux with automated testing via Molecule.
+license:
+  - MIT
+license_file: LICENSE
+tags:
+  - wordpress
+  - web
+  - php
+  - apache
+  - mysql
+  - webserver
+  - cms
+  - lamp
+dependencies:
+  geerlingguy.mysql: ">=5.0.0"
+repository: https://github.com/TU_USUARIO/ansible-role-wordpress-webserver
+documentation: https://github.com/TU_USUARIO/ansible-role-wordpress-webserver
+homepage: https://github.com/TU_USUARIO/ansible-role-wordpress-webserver
+issues: https://github.com/TU_USUARIO/ansible-role-wordpress-webserver/issues

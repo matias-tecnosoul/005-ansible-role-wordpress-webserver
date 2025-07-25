@@ -1,0 +1,34 @@
+---
+# Configuración de PHP
+
+- name: "Configurar PHP.ini"
+  ansible.builtin.lineinfile:
+    path: "/etc/php/{{ php_version }}/apache2/php.ini"
+    regexp: "^{{ item.key }}\\s*="
+    line: "{{ item.key }} = {{ item.value }}"
+    backup: true
+  loop:
+    - { key: "memory_limit", value: "{{ php_memory_limit }}" }
+    - { key: "max_execution_time", value: "{{ php_max_execution_time }}" }
+    - { key: "upload_max_filesize", value: "{{ php_upload_max_filesize }}" }
+    - { key: "post_max_size", value: "{{ php_post_max_size }}" }
+    - { key: "max_input_vars", value: "3000" }
+  when: ansible_os_family == "Debian"
+  notify: restart apache2
+  tags: ["php", "config"]
+
+- name: "Configurar PHP.ini (RedHat)"
+  ansible.builtin.lineinfile:
+    path: "/etc/php.ini"
+    regexp: "^{{ item.key }}\\s*="
+    line: "{{ item.key }} = {{ item.value }}"
+    backup: true
+  loop:
+    - { key: "memory_limit", value: "{{ php_memory_limit }}" }
+    - { key: "max_execution_time", value: "{{ php_max_execution_time }}" }
+    - { key: "upload_max_filesize", value: "{{ php_upload_max_filesize }}" }
+    - { key: "post_max_size", value: "{{ php_post_max_size }}" }
+    - { key: "max_input_vars", value: "3000" }
+  when: ansible_os_family == "RedHat"
+  notify: restart httpd
+  tags: ["php", "config"]

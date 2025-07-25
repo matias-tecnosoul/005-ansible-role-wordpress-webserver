@@ -1,0 +1,29 @@
+---
+# Perfil moderado - Mantiene estándares Galaxy pero no demasiado estricto
+profile: moderate
+
+exclude_paths:
+  - .cache/
+  - .github/
+  - molecule-env/
+  - .vagrant/
+  - roles/geerlingguy.mysql/
+
+# Solo ignorar errores de formato menos críticos
+skip_list:
+  - yaml[line-length]              # Líneas largas (URLs, etc.)
+  - name[casing]                   # Capitalización (por ahora)
+  - risky-file-permissions         # Permisos específicos de WordPress
+
+# Mantener estos como warnings para mejorar gradualmente
+warn_list:
+  - command-instead-of-shell       # Preferir módulos específicos
+  - deprecated-command-syntax      # Sintaxis deprecated
+
+# NO ignorar estos (importantes para Galaxy):
+# - ignore-errors                  # Manejo de errores apropiado
+# - no-changed-when               # Idempotencia
+# - yaml[comments]                # Formato de comentarios
+
+use_default_rules: true
+verbosity: 1

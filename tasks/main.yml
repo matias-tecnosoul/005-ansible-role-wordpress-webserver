@@ -1,0 +1,36 @@
+---
+# Tareas principales del role webserver
+
+- name: "Detectar versión de PHP disponible"
+  ansible.builtin.include_tasks: detect-php-version.yml
+  tags: ["always"]
+
+- name: "Incluir variables específicas por OS"
+  ansible.builtin.include_vars: "{{ ansible_os_family | lower }}.yml"
+  tags: ["always"]
+
+- name: "Instalar paquetes web server y PHP (Debian/Ubuntu)"
+  ansible.builtin.include_tasks: debian.yml
+  when: ansible_os_family == "Debian"
+  tags: ["packages", "php"]
+
+- name: "Instalar paquetes web server y PHP (RedHat/CentOS)"
+  ansible.builtin.include_tasks: redhat.yml
+  when: ansible_os_family == "RedHat"
+  tags: ["packages", "php"]
+
+- name: "Configurar PHP"
+  ansible.builtin.include_tasks: php.yml
+  tags: ["php", "config"]
+
+- name: "Instalar y configurar WordPress"
+  ansible.builtin.include_tasks: wordpress.yml
+  tags: ["wordpress"]
+
+- name: "Asegurar que servicios estén iniciados"
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop: "{{ webserver_services }}"
+  tags: ["services"]

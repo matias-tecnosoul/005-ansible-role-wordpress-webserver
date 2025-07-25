@@ -1,0 +1,31 @@
+# Dependencias para testing del role webserver con Molecule
+# Instalar con: pip install -r requirements-dev.txt
+# Python 3.11.11 compatible
+
+# Core Ansible
+ansible-core==2.15.8
+
+# Molecule para testing 
+molecule==6.0.3
+molecule-plugins[docker]==23.5.0
+
+# Linting y calidad de código
+ansible-lint==6.22.2
+yamllint==1.33.0
+
+# Docker SDK para Python
+docker==7.0.0
+
+# Dependencias base necesarias
+jinja2==3.1.2
+packaging==23.2
+rich==13.7.0
+
+# Para tests de conectividad MySQL
+PyMySQL==1.1.0
+
+# Dependencias de soporte
+setuptools>=65.0.0
+wheel>=0.38.0
+requests>=2.28.0
+

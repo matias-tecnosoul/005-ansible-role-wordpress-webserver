@@ -1,0 +1,9 @@
+<VirtualHost *:{{ apache_port }}>
+    ServerName {{ domain }}
+    DocumentRoot {{ wp_install_dir }}
+    
+    <Directory {{ wp_install_dir }}>
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>

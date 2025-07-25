@@ -1,0 +1,19 @@
+---
+# Handlers del role webserver
+
+- name: restart apache2
+  ansible.builtin.service:
+    name: apache2
+    state: restarted
+  when: ansible_os_family == "Debian"
+
+- name: restart httpd
+  ansible.builtin.service:
+    name: httpd
+    state: restarted
+  when: ansible_os_family == "RedHat"
+
+- name: restart php-fpm
+  ansible.builtin.service:
+    name: "php{{ php_version }}-fpm"
+    state: restarted
