@@ -1,34 +1,64 @@
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyc
-.Python
-env/
+# Python environments
+molecule-env/
 venv/
 .venv/
-molecule-env/
+env/
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+.Python
 
-# Molecule
-.cache/
+# Molecule testing
 .molecule/
+.cache/
 .pytest_cache/
 
 # Ansible
 *.retry
 .vault_pass
+.ansible/
 
-# Testing
-*.tmp
-*.log
-.tox/
+# Dependencies downloaded by Galaxy (should be installed via requirements.yml)
+geerlingguy.mysql/
+roles/geerlingguy.mysql/
 
-# IDEs
+# Galaxy symlinks and role downloads
+matias-tecnosoul.wordpress_webserver
+roles/matias-tecnosoul.wordpress_webserver/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
-# OS
-.DS_Store
-Thumbs.db
+# Temporary files
+*.tmp
+*.log
+*.backup
+.cleanup-backup-*
+
+# Testing artifacts
+.tox/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Docker
+.vagrant/
+# Ansible dependencies (installed via requirements.yml)
+.ansible-deps/
+geerlingguy.mysql/

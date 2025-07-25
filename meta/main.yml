@@ -11,21 +11,21 @@ galaxy_info:
   company: TecnoSoul
   license: GPL-3.0-or-later
   min_ansible_version: "2.12"
-  
+
   # Plataformas donde funciona el role
   platforms:
     - name: Ubuntu
       versions:
-        - jammy    # 22.04 → PHP 8.1
-        - focal    # 20.04 → PHP 7.4
+        - jammy # 22.04 → PHP 8.1
+        - focal # 20.04 → PHP 7.4
     - name: Debian
       versions:
-        - bullseye  # 11 → PHP 7.4
-        - bookworm  # 12 → PHP 8.2
+        - bullseye # 11 → PHP 7.4
+        - bookworm # 12 → PHP 8.2
     - name: EL
       versions:
-        - "8"      # Rocky 8
-        - "9"      # Rocky 9 → PHP 8.0
+        - "8" # Rocky 8
+        - "9" # Rocky 9 → PHP 8.0
 
   # Tags para búsqueda en Galaxy
   galaxy_tags:
