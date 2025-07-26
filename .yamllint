@@ -1,19 +1,39 @@
 ---
 extends: default
-
+# version con reglas relajadas para dev
 rules:
   line-length:
-    max: 120
-    level: warning
-
+    max: 160  # Más permisivo
+    level: warning  # Solo warning, no error
+  
   truthy:
-    allowed-values: ["true", "false", yes, no]
+    allowed-values: ['true', 'false', 'yes', 'no', 'on', 'off']
+    check-keys: true
+  
   indentation:
     spaces: 2
     indent-sequences: consistent
+ 
+  trailing-spaces: disable  # Desactivar trailing spaces
+  
+  new-line-at-end-of-file: enable  # importante
+  
+  comments:
+    min-spaces-from-content: 1
+    level: warning  # Solo warning
+  
+  braces:
+    max-spaces-inside: 1
+    level: warning  # Solo warning
+    
+  brackets:
+    max-spaces-inside: 1
+    level: warning  # Solo warning
 
 ignore: |
   .cache/
   molecule-env/
   .vagrant/
+  .ansible-deps/
   roles/geerlingguy.mysql/
+  
