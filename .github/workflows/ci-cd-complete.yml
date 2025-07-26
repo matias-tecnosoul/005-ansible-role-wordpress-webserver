@@ -23,12 +23,14 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install compatible linting tools
+      # FIX: Usar versiones modernas como en local
+      - name: Install modern linting tools
         run: |
           python -m pip install --upgrade pip
-          pip install ansible-core==2.15.8
-          pip install ansible-lint==6.22.2
-          pip install yamllint==1.33.0
+          # Versiones que funcionan en local
+          pip install ansible-core>=2.15.0
+          pip install ansible-lint>=24.0.0
+          pip install yamllint>=1.32.0
 
       - name: Run yamllint
         run: yamllint .
@@ -64,10 +66,10 @@ jobs:
           mkdir -p ~/.ansible/roles
           ansible-galaxy install -r requirements.yml --force
           
-          if [[ -d ~/.cache/ansible-compat/*/roles/geerlingguy.mysql ]]; then
-            cp -r ~/.cache/ansible-compat/*/roles/geerlingguy.mysql ~/.ansible/roles/
-          fi
+          # Buscar y copiar geerlingguy.mysql donde está
+          find ~/.cache -name "geerlingguy.mysql" -type d | head -1 | xargs -I {} cp -r {} ~/.ansible/roles/ || true
           
+          echo "✅ Roles disponibles:"
           ansible-galaxy role list
 
       - name: Run Molecule tests
@@ -94,7 +96,7 @@ jobs:
       - name: Install Ansible
         run: |
           python -m pip install --upgrade pip
-          pip install ansible-core==2.15.8
+          pip install ansible-core>=2.15.0
 
       - name: Publish to Galaxy
         run: |
@@ -104,3 +106,8 @@ jobs:
             ${{ github.event.repository.name }}
         env:
           GALAXY_API_KEY: ${{ secrets.GALAXY_API_KEY }}
+
+      - name: Success Notification
+        run: |
+          echo "🎉 Role published to Galaxy!"
+          echo "📦 https://galaxy.ansible.com/ui/standalone/roles/${{ github.repository_owner }}/wordpress_webserver/"
