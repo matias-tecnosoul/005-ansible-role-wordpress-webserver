@@ -4,7 +4,7 @@
 [![Galaxy](https://github.com/matias-tecnosoul/005-ansible-role-wordpress-webserver/workflows/Publish%20to%20Ansible%20Galaxy/badge.svg)](https://github.com/matias-tecnosoul/005-ansible-role-wordpress-webserver/actions)
 [![License](https://img.shields.io/github/license/matias-tecnosoul/005-ansible-role-wordpress-webserver)](https://github.com/matias-tecnosoul/005-ansible-role-wordpress-webserver/blob/main/LICENSE)
 
-Production-ready Ansible role for complete WordPress webserver setup with **automatic PHP version detection** by distribution, Apache HTTP Server, and MySQL connectivity.
+Ansible role for complete WordPress webserver setup with **automatic PHP version detection** by distribution, Apache HTTP Server, and MySQL connectivity.
 
 ## 🎯 Key Features
 
