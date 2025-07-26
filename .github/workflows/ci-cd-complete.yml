@@ -23,10 +23,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install linting tools
+      - name: Install compatible linting tools
         run: |
           python -m pip install --upgrade pip
-          pip install ansible-lint==6.22.2 yamllint==1.33.0
+          pip install ansible-core==2.15.8
+          pip install ansible-lint==6.22.2
+          pip install yamllint==1.33.0
 
       - name: Run yamllint
         run: yamllint .
@@ -57,24 +59,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
-      # SIMPLIFICADO: Solo configurar roles_path básico
-      - name: Configure Ansible for CI
+      - name: Install Galaxy dependencies for CI
         run: |
-          cat > ansible.cfg << 'EOF'
-          [defaults]
-          roles_path = ~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
-          host_key_checking = False
-          stdout_callback = yaml
-          
-          [ssh_connection]
-          pipelining = True
-          EOF
-
-      # SIMPLIFICADO: Solo instalación estándar
-      - name: Install Galaxy dependencies
-        run: |
+          mkdir -p ~/.ansible/roles
           ansible-galaxy install -r requirements.yml --force
-          echo "✅ Dependencies installed"
+          
+          if [[ -d ~/.cache/ansible-compat/*/roles/geerlingguy.mysql ]]; then
+            cp -r ~/.cache/ansible-compat/*/roles/geerlingguy.mysql ~/.ansible/roles/
+          fi
+          
           ansible-galaxy role list
 
       - name: Run Molecule tests
@@ -83,51 +76,10 @@ jobs:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
 
-  integration-test:
-    name: Multi-Distro Integration
-    runs-on: ubuntu-22.04
-    needs: [lint, test]
-    
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-
-      - name: Configure Ansible
-        run: |
-          cat > ansible.cfg << 'EOF'
-          [defaults]
-          roles_path = ~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
-          host_key_checking = False
-          stdout_callback = yaml
-          EOF
-
-      - name: Install Galaxy dependencies
-        run: |
-          ansible-galaxy install -r requirements.yml --force
-
-      - name: Run Multi-Distro Test
-        run: |
-          echo "🎬 Starting Multi-Distro Integration Test"
-          molecule test -s default
-          echo "🎉 Multi-distro testing completed!"
-        env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
-
   publish-galaxy:
     name: Publish to Galaxy
     runs-on: ubuntu-22.04
-    needs: [lint, test, integration-test]
+    needs: [lint, test]
     if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
     
     steps:
@@ -142,7 +94,7 @@ jobs:
       - name: Install Ansible
         run: |
           python -m pip install --upgrade pip
-          pip install ansible-core
+          pip install ansible-core==2.15.8
 
       - name: Publish to Galaxy
         run: |
@@ -152,8 +104,3 @@ jobs:
             ${{ github.event.repository.name }}
         env:
           GALAXY_API_KEY: ${{ secrets.GALAXY_API_KEY }}
-
-      - name: Success Notification
-        run: |
-          echo "🎉 Role published to Galaxy!"
-          echo "📦 https://galaxy.ansible.com/ui/standalone/roles/${{ github.repository_owner }}/wordpress_webserver/"
