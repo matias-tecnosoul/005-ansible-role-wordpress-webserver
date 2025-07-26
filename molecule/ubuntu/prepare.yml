@@ -1,21 +1,23 @@
 ---
-- name: Prepare
+- name: Prepare - Install MySQL and Dependencies
   hosts: all
   become: true
   gather_facts: true
   
   tasks:
-    - name: Install MySQL connector for Python
+    - name: Install Python MySQL connector
       pip:
         name: PyMySQL
         state: present
         
-    # Instalar role directamente si no existe
-    - name: Install geerlingguy.mysql role
-      command: ansible-galaxy install geerlingguy.mysql --force
+    # SOLUCIÓN SIMPLE: Asegurar que el role está disponible
+    - name: Ensure geerlingguy.mysql role is installed
+      ansible.builtin.command: 
+        cmd: ansible-galaxy install geerlingguy.mysql --force
       delegate_to: localhost
       run_once: true
-      ignore_errors: true  # No fallar si ya está instalado
+      changed_when: false
+      failed_when: false  # No fallar si ya está instalado
         
     - name: Install and configure MySQL
       include_role:
@@ -27,8 +29,17 @@
         host: localhost
         timeout: 60
         
-    - name: Verify MySQL is running
+    # MySQL service name varia por distribución
+    - name: Verify MySQL is running (Ubuntu/Debian)
       systemd:
         name: mysql
         state: started
         enabled: yes
+      when: ansible_os_family == "Debian"
+      
+    - name: Verify MySQL is running (Rocky/RHEL)
+      systemd:
+        name: mysqld
+        state: started
+        enabled: yes
+      when: ansible_os_family == "RedHat"

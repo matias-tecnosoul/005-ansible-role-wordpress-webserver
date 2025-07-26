@@ -8,6 +8,7 @@ on:
     branches: [main]
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -25,7 +26,7 @@ jobs:
       - name: Install linting tools
         run: |
           python -m pip install --upgrade pip
-          pip install ansible-lint yamllint
+          pip install ansible-lint==6.22.2 yamllint==1.33.0
 
       - name: Run yamllint
         run: yamllint .
@@ -56,34 +57,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
-      - name: Install Galaxy dependencies (CI-specific)
-        run: |
-          # Método 1: Instalar en directorio roles/
-          mkdir -p roles
-          ansible-galaxy install -r requirements.yml -p roles/ --force
-          
-          # Método 2: Instalar en ubicación default también
-          ansible-galaxy install -r requirements.yml --force
-          
-          # Verificar instalación
-          ansible-galaxy role list
-
+      # SIMPLIFICADO: Solo configurar roles_path básico
       - name: Configure Ansible for CI
         run: |
-          # Crear ansible.cfg específico para CI
-          cat > ansible.cfg << 'ANSIBLE_CFG'
+          cat > ansible.cfg << 'EOF'
           [defaults]
-          roles_path = ./roles:./:.ansible-deps:~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
+          roles_path = ~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
           host_key_checking = False
           stdout_callback = yaml
-          callbacks_enabled = profile_tasks, timer
-          
-          [inventory]
-          enable_plugins = host_list, script, auto, yaml, ini, toml
           
           [ssh_connection]
           pipelining = True
-          ANSIBLE_CFG
+          EOF
+
+      # SIMPLIFICADO: Solo instalación estándar
+      - name: Install Galaxy dependencies
+        run: |
+          ansible-galaxy install -r requirements.yml --force
+          echo "✅ Dependencies installed"
+          ansible-galaxy role list
 
       - name: Run Molecule tests
         run: molecule test -s ${{ matrix.scenario }}
@@ -92,7 +84,7 @@ jobs:
           ANSIBLE_FORCE_COLOR: '1'
 
   integration-test:
-    name: Full Integration Test
+    name: Multi-Distro Integration
     runs-on: ubuntu-22.04
     needs: [lint, test]
     
@@ -110,24 +102,22 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
-      - name: Install Galaxy dependencies
+      - name: Configure Ansible
         run: |
-          mkdir -p roles
-          ansible-galaxy install -r requirements.yml -p roles/ --force
-          ansible-galaxy install -r requirements.yml --force
-
-      - name: Configure Ansible for integration
-        run: |
-          cat > ansible.cfg << 'ANSIBLE_CFG'
+          cat > ansible.cfg << 'EOF'
           [defaults]
-          roles_path = ./roles:./:.ansible-deps:~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
+          roles_path = ~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
           host_key_checking = False
           stdout_callback = yaml
-          callbacks_enabled = profile_tasks, timer
-          ANSIBLE_CFG
+          EOF
 
-      - name: Run Multi-Distro Integration Test
+      - name: Install Galaxy dependencies
         run: |
+          ansible-galaxy install -r requirements.yml --force
+
+      - name: Run Multi-Distro Test
+        run: |
+          echo "🎬 Starting Multi-Distro Integration Test"
           molecule test -s default
           echo "🎉 Multi-distro testing completed!"
         env:
@@ -135,7 +125,7 @@ jobs:
           ANSIBLE_FORCE_COLOR: '1'
 
   publish-galaxy:
-    name: Publish to Ansible Galaxy
+    name: Publish to Galaxy
     runs-on: ubuntu-22.04
     needs: [lint, test, integration-test]
     if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
@@ -165,8 +155,6 @@ jobs:
 
       - name: Success Notification
         run: |
-          echo "🎉 Role published successfully to Ansible Galaxy!"
-          echo "📦 Namespace: ${{ github.repository_owner }}"
-          echo "🏷️  Role: wordpress_webserver"
-          echo "🔗 Galaxy URL: https://galaxy.ansible.com/ui/standalone/roles/${{ github.repository_owner }}/wordpress_webserver/"
-          echo "📥 Install with: ansible-galaxy role install ${{ github.repository_owner }}.wordpress_webserver"
+          echo "🎉 Role published to Galaxy!"
+          echo "📦 https://galaxy.ansible.com/ui/standalone/roles/${{ github.repository_owner }}/wordpress_webserver/"
+          
