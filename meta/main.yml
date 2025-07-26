@@ -5,14 +5,12 @@ galaxy_info:
   author: Matias TecnoSoul
   description: >-
     Production-ready WordPress webserver with Apache HTTP Server,
-    automatic PHP version detection by distribution (Ubuntu 22.04→PHP 8.1,
-    Debian 12→PHP 8.2, Rocky Linux 9→PHP 8.0), MySQL integration,
+    automatic PHP version detection by distribution, MySQL integration,
     and comprehensive multi-distribution testing via Molecule.
   company: TecnoSoul
   license: GPL-3.0-or-later
   min_ansible_version: "2.12"
 
-  # Plataformas donde funciona el role
   platforms:
     - name: Ubuntu
       versions:
@@ -27,7 +25,6 @@ galaxy_info:
         - "8" # Rocky 8
         - "9" # Rocky 9 → PHP 8.0
 
-  # Tags para búsqueda en Galaxy
   galaxy_tags:
     - wordpress
     - web
@@ -37,19 +34,13 @@ galaxy_info:
     - webserver
     - cms
     - lamp
-    - molecule
-    - testing
-    - multi-distro
-    - php8
-    - automation
-    - devops
 
-# Dependencias del role
+# ✅ CRÍTICO: Dependencies que Molecule debería usar automáticamente
 dependencies:
   - role: geerlingguy.mysql
     version: ">=5.0.0"
 
-# Collections que usa el role internamente
+# ✅ CRÍTICO: Collections necesarias
 collections:
   - community.mysql
   - community.general
