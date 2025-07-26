@@ -36,4 +36,3 @@ ignore: |
   .vagrant/
   .ansible-deps/
   roles/geerlingguy.mysql/
-#lint
