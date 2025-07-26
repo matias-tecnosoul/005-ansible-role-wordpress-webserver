@@ -1,33 +1,15 @@
-# Dependencias para testing del role webserver con Molecule
-# Versiones específicas para compatibilidad Docker 28.x
-# Python 3.11.11 compatible
-
-# Core Ansible
+# Versiones estables y compatibles
 ansible-core==2.15.8
-
-# Molecule para testing 
 molecule==6.0.3
 molecule-plugins[docker]==23.5.0
-
-# Linting y calidad de código
 ansible-lint==6.22.2
 yamllint==1.33.0
-
-# Docker SDK - VERSIÓN ESPECÍFICA para Docker 28.x
 docker==7.0.0
-
-# Dependencias de networking - versión específica
 requests==2.31.0
 urllib3==2.0.7
-
-# Dependencias base necesarias
 jinja2==3.1.2
 packaging==23.2
 rich==13.7.0
-
-# Para tests de conectividad MySQL
 PyMySQL==1.1.0
-
-# Dependencias de soporte
 setuptools>=65.0.0
 wheel>=0.38.0

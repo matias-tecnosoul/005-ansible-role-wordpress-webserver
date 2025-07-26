@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install linting tools from requirements-dev
+      - name: Install stable compatible versions
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
@@ -59,44 +59,17 @@ jobs:
 
       - name: Install Galaxy dependencies for CI
         run: |
-          echo "🔍 Installing Galaxy dependencies..."
           mkdir -p ~/.ansible/roles
-          
-          # Instalar dependencies
           ansible-galaxy install -r requirements.yml --force
           
-          echo "📋 Searching for geerlingguy.mysql:"
-          find /home/runner -name "geerlingguy.mysql" -type d 2>/dev/null || echo "❌ Not found in /home/runner"
-          
-          # Buscar en ubicaciones comunes
-          SEARCH_PATHS=(
-            "/home/runner/.cache"
-            "/home/runner/.ansible"
-            "/home/runner/work"
-            "/opt/hostedtoolcache"
-          )
-          
-          MYSQL_ROLE_PATH=""
-          for path in "${SEARCH_PATHS[@]}"; do
-            found=$(find "$path" -name "geerlingguy.mysql" -type d 2>/dev/null | head -1)
-            if [[ -n "$found" ]]; then
-              MYSQL_ROLE_PATH="$found"
-              echo "✅ Found geerlingguy.mysql at: $MYSQL_ROLE_PATH"
-              break
-            fi
-          done
-          
+          # Buscar y copiar geerlingguy.mysql
+          MYSQL_ROLE_PATH=$(find /home/runner -name "geerlingguy.mysql" -type d 2>/dev/null | head -1)
           if [[ -n "$MYSQL_ROLE_PATH" ]]; then
             cp -r "$MYSQL_ROLE_PATH" ~/.ansible/roles/
-            echo "✅ Copied to ~/.ansible/roles/"
           else
-            echo "❌ geerlingguy.mysql not found anywhere"
-            echo "📋 Trying direct install to ~/.ansible/roles:"
             ansible-galaxy install geerlingguy.mysql -p ~/.ansible/roles --force
           fi
           
-          echo "📋 Final verification:"
-          ls -la ~/.ansible/roles/ || echo "No ~/.ansible/roles directory"
           ansible-galaxy role list
 
       - name: Run Molecule tests
@@ -104,37 +77,3 @@ jobs:
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
-
-  publish-galaxy:
-    name: Publish to Galaxy
-    runs-on: ubuntu-22.04
-    needs: [lint, test]
-    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
-    
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install Ansible
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
-
-      - name: Publish to Galaxy
-        run: |
-          ansible-galaxy role import \
-            --api-key ${{ secrets.GALAXY_API_KEY }} \
-            ${{ github.repository_owner }} \
-            ${{ github.event.repository.name }}
-        env:
-          GALAXY_API_KEY: ${{ secrets.GALAXY_API_KEY }}
-
-      - name: Success Notification
-        run: |
-          echo "🎉 Role published to Galaxy!"
-          echo "📦 https://galaxy.ansible.com/ui/standalone/roles/${{ github.repository_owner }}/wordpress_webserver/"
