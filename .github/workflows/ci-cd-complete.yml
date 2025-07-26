@@ -56,8 +56,34 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
-      - name: Install Galaxy dependencies
-        run: ansible-galaxy install -r requirements.yml
+      - name: Install Galaxy dependencies (CI-specific)
+        run: |
+          # Método 1: Instalar en directorio roles/
+          mkdir -p roles
+          ansible-galaxy install -r requirements.yml -p roles/ --force
+          
+          # Método 2: Instalar en ubicación default también
+          ansible-galaxy install -r requirements.yml --force
+          
+          # Verificar instalación
+          ansible-galaxy role list
+
+      - name: Configure Ansible for CI
+        run: |
+          # Crear ansible.cfg específico para CI
+          cat > ansible.cfg << 'ANSIBLE_CFG'
+          [defaults]
+          roles_path = ./roles:./:.ansible-deps:~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
+          host_key_checking = False
+          stdout_callback = yaml
+          callbacks_enabled = profile_tasks, timer
+          
+          [inventory]
+          enable_plugins = host_list, script, auto, yaml, ini, toml
+          
+          [ssh_connection]
+          pipelining = True
+          ANSIBLE_CFG
 
       - name: Run Molecule tests
         run: molecule test -s ${{ matrix.scenario }}
@@ -85,7 +111,20 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Install Galaxy dependencies
-        run: ansible-galaxy install -r requirements.yml
+        run: |
+          mkdir -p roles
+          ansible-galaxy install -r requirements.yml -p roles/ --force
+          ansible-galaxy install -r requirements.yml --force
+
+      - name: Configure Ansible for integration
+        run: |
+          cat > ansible.cfg << 'ANSIBLE_CFG'
+          [defaults]
+          roles_path = ./roles:./:.ansible-deps:~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles
+          host_key_checking = False
+          stdout_callback = yaml
+          callbacks_enabled = profile_tasks, timer
+          ANSIBLE_CFG
 
       - name: Run Multi-Distro Integration Test
         run: |
@@ -99,7 +138,6 @@ jobs:
     name: Publish to Ansible Galaxy
     runs-on: ubuntu-22.04
     needs: [lint, test, integration-test]
-    # Solo ejecutar en releases o manualmente
     if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
     
     steps:
@@ -130,10 +168,5 @@ jobs:
           echo "🎉 Role published successfully to Ansible Galaxy!"
           echo "📦 Namespace: ${{ github.repository_owner }}"
           echo "🏷️  Role: wordpress_webserver"
-          echo "🔗 Galaxy URL: https://galaxy.ansible.com/${{ github.repository_owner }}/wordpress_webserver"
+          echo "🔗 Galaxy URL: https://galaxy.ansible.com/ui/standalone/roles/${{ github.repository_owner }}/wordpress_webserver/"
           echo "📥 Install with: ansible-galaxy role install ${{ github.repository_owner }}.wordpress_webserver"
-          echo ""
-          echo "🚀 Usage in playbook:"
-          echo "roles:"
-          echo "  - geerlingguy.mysql"
-          echo "  - ${{ github.repository_owner }}.wordpress_webserver"
