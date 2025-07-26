@@ -10,6 +10,13 @@
         name: PyMySQL
         state: present
         
+    # Instalar role directamente si no existe
+    - name: Install geerlingguy.mysql role
+      command: ansible-galaxy install geerlingguy.mysql --force
+      delegate_to: localhost
+      run_once: true
+      ignore_errors: true  # No fallar si ya está instalado
+        
     - name: Install and configure MySQL
       include_role:
         name: geerlingguy.mysql

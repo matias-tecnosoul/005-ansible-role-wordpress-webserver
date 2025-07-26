@@ -1,14 +1,21 @@
 ---
-- name: Prepare Debian
+- name: Prepare
   hosts: all
   become: true
   gather_facts: true
   
   tasks:
-    - name: Install Python MySQL connector
+    - name: Install MySQL connector for Python
       pip:
         name: PyMySQL
         state: present
+        
+    # Instalar role directamente si no existe
+    - name: Install geerlingguy.mysql role
+      command: ansible-galaxy install geerlingguy.mysql --force
+      delegate_to: localhost
+      run_once: true
+      ignore_errors: true  # No fallar si ya está instalado
         
     - name: Install and configure MySQL
       include_role:
