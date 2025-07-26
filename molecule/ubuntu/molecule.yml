@@ -20,11 +20,6 @@ platforms:
 
 provisioner:
   name: ansible
-  config_options:
-    defaults:
-      callbacks_enabled: profile_tasks,timer
-      stdout_callback: yaml
-      host_key_checking: false
   inventory:
     host_vars:
       ubuntu-instance:
@@ -54,7 +49,6 @@ provisioner:
         wordpress_db_name: "test_wordpress_db"
         wordpress_db_user: "test_wp_user"
         wordpress_db_password: "test_wp_password"
-        webserver_type: "apache"
 
 verifier:
   name: ansible

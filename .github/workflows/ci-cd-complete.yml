@@ -157,4 +157,3 @@ jobs:
         run: |
           echo "🎉 Role published to Galaxy!"
           echo "📦 https://galaxy.ansible.com/ui/standalone/roles/${{ github.repository_owner }}/wordpress_webserver/"
-          
