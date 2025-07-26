@@ -23,14 +23,10 @@ jobs:
         with:
           python-version: '3.11'
 
-      # FIX: Usar versiones modernas como en local
-      - name: Install modern linting tools
+      - name: Install linting tools from requirements-dev
         run: |
           python -m pip install --upgrade pip
-          # Versiones que funcionan en local
-          pip install ansible-core>=2.15.0
-          pip install ansible-lint>=24.0.0
-          pip install yamllint>=1.32.0
+          pip install -r requirements-dev.txt
 
       - name: Run yamllint
         run: yamllint .
@@ -63,13 +59,44 @@ jobs:
 
       - name: Install Galaxy dependencies for CI
         run: |
+          echo "🔍 Installing Galaxy dependencies..."
           mkdir -p ~/.ansible/roles
+          
+          # Instalar dependencies
           ansible-galaxy install -r requirements.yml --force
           
-          # Buscar y copiar geerlingguy.mysql donde está
-          find ~/.cache -name "geerlingguy.mysql" -type d | head -1 | xargs -I {} cp -r {} ~/.ansible/roles/ || true
+          echo "📋 Searching for geerlingguy.mysql:"
+          find /home/runner -name "geerlingguy.mysql" -type d 2>/dev/null || echo "❌ Not found in /home/runner"
           
-          echo "✅ Roles disponibles:"
+          # Buscar en ubicaciones comunes
+          SEARCH_PATHS=(
+            "/home/runner/.cache"
+            "/home/runner/.ansible"
+            "/home/runner/work"
+            "/opt/hostedtoolcache"
+          )
+          
+          MYSQL_ROLE_PATH=""
+          for path in "${SEARCH_PATHS[@]}"; do
+            found=$(find "$path" -name "geerlingguy.mysql" -type d 2>/dev/null | head -1)
+            if [[ -n "$found" ]]; then
+              MYSQL_ROLE_PATH="$found"
+              echo "✅ Found geerlingguy.mysql at: $MYSQL_ROLE_PATH"
+              break
+            fi
+          done
+          
+          if [[ -n "$MYSQL_ROLE_PATH" ]]; then
+            cp -r "$MYSQL_ROLE_PATH" ~/.ansible/roles/
+            echo "✅ Copied to ~/.ansible/roles/"
+          else
+            echo "❌ geerlingguy.mysql not found anywhere"
+            echo "📋 Trying direct install to ~/.ansible/roles:"
+            ansible-galaxy install geerlingguy.mysql -p ~/.ansible/roles --force
+          fi
+          
+          echo "📋 Final verification:"
+          ls -la ~/.ansible/roles/ || echo "No ~/.ansible/roles directory"
           ansible-galaxy role list
 
       - name: Run Molecule tests
@@ -96,7 +123,7 @@ jobs:
       - name: Install Ansible
         run: |
           python -m pip install --upgrade pip
-          pip install ansible-core>=2.15.0
+          pip install -r requirements-dev.txt
 
       - name: Publish to Galaxy
         run: |
