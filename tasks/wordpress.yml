@@ -127,3 +127,4 @@
     - "{{ wordpress_temp_dir }}/wordpress-{{ wordpress_version }}.tar.gz"
     - "{{ wordpress_temp_dir }}/wordpress"
   tags: ["wordpress", "cleanup"]
+  
