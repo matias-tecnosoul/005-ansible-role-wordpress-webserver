@@ -42,6 +42,5 @@ galaxy_info:
 
 # ✅ CRÍTICO: Collections necesarias
 collections:
-  - community.mysql
   - community.general
   - ansible.posix
