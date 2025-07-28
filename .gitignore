@@ -74,3 +74,23 @@ requirements-dev.txt
 .cache/
 .pytest_cache/
 .tox/
+
+# ✅ TESTING DEPENDENCIES (not part of role)
+# Ansible dependencies (installed via requirements.yml for testing only)
+.ansible-deps/
+geerlingguy.mysql/
+roles/geerlingguy.mysql/
+
+# Galaxy symlinks and role downloads  
+matias-tecnosoul.wordpress_webserver
+roles/matias-tecnosoul.wordpress_webserver/
+
+# ✅ TESTING DEPENDENCIES (not part of role)
+# Ansible dependencies (installed via requirements.yml for testing only)
+.ansible-deps/
+geerlingguy.mysql/
+roles/geerlingguy.mysql/
+
+# Galaxy symlinks and role downloads  
+matias-tecnosoul.wordpress_webserver
+roles/matias-tecnosoul.wordpress_webserver/

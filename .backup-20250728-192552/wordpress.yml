@@ -94,8 +94,6 @@
       ansible.builtin.command: a2ensite wordpress.conf
       when: not wordpress_site_enabled.stat.exists
       changed_when: not wordpress_site_enabled.stat.exists
-      when: not wordpress_site_enabled.stat.exists
-      changed_when: not wordpress_site_enabled.stat.exists
       notify: restart apache2
 
     - name: "Verificar si sitio por defecto está habilitado"
@@ -105,9 +103,6 @@
 
     - name: "Deshabilitar sitio por defecto"
       ansible.builtin.command: a2dissite 000-default.conf
-      when: default_site_enabled.stat.exists
-      changed_when: default_site_enabled.stat.exists
-      failed_when: false
       when: default_site_enabled.stat.exists
       changed_when: default_site_enabled.stat.exists
       notify: restart apache2

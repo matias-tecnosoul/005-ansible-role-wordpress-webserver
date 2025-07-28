@@ -1,35 +1,32 @@
 ---
-- name: Prepare - Install MySQL and Dependencies
+- name: Prepare - Install Dependencies for Testing
   hosts: all
   become: true
   gather_facts: true
   
   tasks:
-    - name: Install Python MySQL connector
+    # ✅ TESTING ONLY: Install MySQL for integration testing
+    # Production users will have their own database setup
+    
+    - name: Install Python MySQL connector for testing
       pip:
         name: PyMySQL
         state: present
         
-    - name: Install and configure MySQL
+    - name: Install MySQL for testing purposes
       include_role:
         name: geerlingguy.mysql
-
+      # This is only for testing - not a role dependency
+      
     - name: Wait for MySQL to be ready
       wait_for:
         port: 3306
         host: localhost
         timeout: 60
         
-    - name: Verify MySQL is running (Ubuntu/Debian)
+    - name: Verify MySQL is running for testing
       systemd:
         name: mysql
         state: started
         enabled: yes
       when: ansible_os_family == "Debian"
-      
-    - name: Verify MySQL is running (Rocky/RHEL)
-      systemd:
-        name: mysqld
-        state: started
-        enabled: yes
-      when: ansible_os_family == "RedHat"
