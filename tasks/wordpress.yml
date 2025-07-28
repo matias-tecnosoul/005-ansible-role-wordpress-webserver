@@ -35,6 +35,25 @@
   when: not wordpress_installed.stat.exists
   tags: ["wordpress", "copy"]
 
+# ✅ NEW: Fix permissions properly after copy
+- name: "Establecer permisos correctos para archivos WordPress"
+  ansible.builtin.file:
+    path: "{{ wordpress_install_dir }}"
+    owner: "{{ wordpress_user }}"
+    group: "{{ wordpress_group }}"
+    mode: "0755"
+    recurse: true
+  when: not wordpress_installed.stat.exists
+  tags: ["wordpress", "permissions"]
+
+- name: "Establecer permisos específicos para archivos PHP"
+  ansible.builtin.shell: |
+    find {{ wordpress_install_dir }} -type f -name "*.php" -exec chmod 644 {} \;
+    find {{ wordpress_install_dir }} -type d -exec chmod 755 {} \;
+  when: not wordpress_installed.stat.exists
+  changed_when: true
+  tags: ["wordpress", "permissions"]
+
 - name: "Establecer permisos especiales para wp-content"
   ansible.builtin.file:
     path: "{{ wordpress_install_dir }}/wp-content"

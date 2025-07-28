@@ -170,19 +170,56 @@ wordpress_user: "www-data"                        # Web server user (auto-detect
 wordpress_group: "www-data"                       # Web server group (auto-detected)
 ```
 
-## 🧪 Testing with Different Database Setups
+Webserver-Only Testing
+This role follows the Single Responsibility Principle and only tests webserver components:
+✅ What we test:
 
-### Testing with geerlingguy.mysql
-```bash
-# Test with MySQL
-molecule test -s ubuntu
-```
+Apache HTTP server installation and configuration
+PHP installation with required extensions
+WordPress files downloaded and configured
+Virtual host configuration
+File permissions and ownership
+Basic HTTP response from Apache
 
-### Testing with external database
-```bash
-# Modify molecule/*/prepare.yml to use your database setup
-molecule create -s ubuntu
-molecule converge -s ubuntu
+❌ What we DON'T test:
+
+Database connectivity (external dependency)
+WordPress installation wizard (requires database)
+End-to-end functionality (requires complete LAMP stack)
+
+Testing with Molecule
+bash# Test webserver components only
+molecule test -s ubuntu   # PHP 8.1
+molecule test -s debian   # PHP 8.2  
+molecule test -s rocky    # PHP 8.0
+
+# Multi-distribution testing
+molecule test -s default
+Expected HTTP Responses
+
+HTTP 500: Expected without database - WordPress can't connect
+HTTP 200/302: With proper database configuration
+HTTP 403/404: Also acceptable - Apache is working
+
+Integration Testing
+For complete WordPress functionality, combine with database role:
+yaml# Complete testing playbook
+- hosts: webservers
+  roles:
+    - geerlingguy.mysql
+    - matias_tecnosoul.wordpress_webserver
+  
+  post_tasks:
+    # Now test database connectivity
+    - mysql_query:
+        login_db: "{{ wordpress_db_name }}"
+        query: "SELECT 1"
+Manual Testing
+After role execution, WordPress will be available for manual setup:
+
+Ubuntu: http://localhost:8180
+Debian: http://localhost:8181
+Rocky: http://localhost:8182
 ```
 
 ## 📊 Supported Distributions
