@@ -2,6 +2,7 @@
 # ✅ WEBSERVER-ONLY ROLE - No database dependencies
 # Users choose their own database setup
 
+# Only collections needed for webserver functionality
 collections:
   - name: community.general
     version: ">=5.0.0"
@@ -9,4 +10,7 @@ collections:
     version: ">=1.0.0"
 
 # No role dependencies - database-agnostic approach
-# For testing, see: molecule/*/requirements.yml
+# roles: []
+
+# For testing with complete stack, use separate requirements file
+# See: molecule/*/requirements.yml for testing-specific dependencies

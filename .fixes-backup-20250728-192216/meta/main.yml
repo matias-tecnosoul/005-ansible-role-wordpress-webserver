@@ -35,6 +35,12 @@ galaxy_info:
     - lamp
 
 # ✅ NO DEPENDENCIES - Database-agnostic design
+# Users choose their own database setup:
+# - geerlingguy.mysql
+# - geerlingguy.mariadb  
+# - External databases
+# - Docker containers
+# - Cloud databases (RDS, etc.)
 dependencies: []
 
 # ✅ Required collections for webserver functionality
