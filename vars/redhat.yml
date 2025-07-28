@@ -1,9 +1,9 @@
 ---
 # Variables específicas para RedHat/CentOS/Rocky
-# roles/webserver/vars/redhat.yml
 
 webserver_services:
   - httpd
+  # NO php-fpm - usar mod_php
 
 # Usuario y grupo del servidor web
 wordpress_user: apache
@@ -14,12 +14,11 @@ apache_conf_dir: /etc/httpd/conf
 apache_vhost_dir: /etc/httpd/conf.d
 php_ini_path: /etc/php.ini
 
-# Paquetes para Rocky Linux 9 con PHP
+# Paquetes para Rocky Linux 9 - CON mod_php
 redhat_packages:
   - httpd
   - php
   - php-mysqlnd
-  - php-curl
   - php-gd
   - php-mbstring
   - php-xml
@@ -29,5 +28,4 @@ redhat_packages:
   - php-json
   - php-opcache
   - unzip
-  - curl
   - wget

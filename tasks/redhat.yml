@@ -7,11 +7,32 @@
     state: present
   tags: [packages, repo]
 
+- name: Remover curl-minimal si existe (Rocky Linux fix)
+  ansible.builtin.dnf:
+    name: curl-minimal
+    state: absent
+  failed_when: false
+  tags: [packages]
+
 - name: Instalar paquetes necesarios para WordPress
   ansible.builtin.dnf:
     name: "{{ redhat_packages }}"
     state: present
   tags: [packages]
+
+- name: Configurar Apache para mod_php (Rocky Linux)
+  ansible.builtin.copy:
+    content: |
+      # PHP file handling
+      <FilesMatch \.php$>
+          SetHandler application/x-httpd-php
+      </FilesMatch>
+      
+      DirectoryIndex index.html index.php
+    dest: /etc/httpd/conf.d/php.conf
+    backup: true
+  notify: restart httpd
+  tags: [php]
 
 - name: Configurar firewall para HTTP/HTTPS
   ansible.posix.firewalld:
