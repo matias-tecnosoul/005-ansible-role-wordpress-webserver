@@ -61,7 +61,7 @@ scenario:
     - create
     - prepare
     - converge
-    # - idempotence  # TEMPORAL: Deshabilitado
+    - idempotence  # TEMPORAL: Deshabilitado
     - verify
     - cleanup
     - destroy

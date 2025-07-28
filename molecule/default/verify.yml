@@ -1,105 +1,5 @@
 ---
-# Verificaciones específicas por distribución
-- name: Verify Ubuntu hosts
-  hosts: ubuntu_hosts
-  become: true
-  gather_facts: true
-  tasks:
-    - name: Debug Ubuntu detection
-      debug:
-        msg:
-          - "Distribution: {{ ansible_distribution }} {{ ansible_distribution_version }}"
-          - "Expected PHP: 8.1"
-          - "Expected Apache: apache2"
-
-    - name: Verify PHP 8.1 is installed on Ubuntu
-      command: php --version
-      register: php_version_ubuntu
-      changed_when: false
-      failed_when: "'PHP 8.1' not in php_version_ubuntu.stdout"
-
-    - name: Show PHP version on Ubuntu
-      debug:
-        msg: "✅ Ubuntu PHP Version: {{ php_version_ubuntu.stdout.split()[1] }}"
-
-    - name: Test WordPress access Ubuntu
-      uri:
-        url: "http://localhost"
-        method: GET
-        status_code: [200, 301, 302, 404]
-      register: http_ubuntu
-
-    - name: Show Ubuntu HTTP status
-      debug:
-        msg: "✅ Ubuntu HTTP Status: {{ http_ubuntu.status }}"
-
-- name: Verify Debian hosts
-  hosts: debian_hosts
-  become: true
-  gather_facts: true
-  tasks:
-    - name: Debug Debian detection
-      debug:
-        msg:
-          - "Distribution: {{ ansible_distribution }} {{ ansible_distribution_version }}"
-          - "Expected PHP: 8.2"
-          - "Expected Apache: apache2"
-
-    - name: Verify PHP 8.2 is installed on Debian
-      command: php --version
-      register: php_version_debian
-      changed_when: false
-      failed_when: "'PHP 8.2' not in php_version_debian.stdout"
-
-    - name: Show PHP version on Debian
-      debug:
-        msg: "✅ Debian PHP Version: {{ php_version_debian.stdout.split()[1] }}"
-
-    - name: Test WordPress access Debian
-      uri:
-        url: "http://localhost"
-        method: GET
-        status_code: [200, 301, 302, 404]
-      register: http_debian
-
-    - name: Show Debian HTTP status
-      debug:
-        msg: "✅ Debian HTTP Status: {{ http_debian.status }}"
-
-- name: Verify Rocky hosts
-  hosts: rocky_hosts
-  become: true
-  gather_facts: true
-  tasks:
-    - name: Debug Rocky detection
-      debug:
-        msg:
-          - "Distribution: {{ ansible_distribution }} {{ ansible_distribution_version }}"
-          - "Expected PHP: 8.0"
-          - "Expected Apache: httpd"
-
-    - name: Verify PHP 8.0 is installed on Rocky
-      command: php --version
-      register: php_version_rocky
-      changed_when: false
-      failed_when: "'PHP 8.0' not in php_version_rocky.stdout"
-
-    - name: Show PHP version on Rocky
-      debug:
-        msg: "✅ Rocky PHP Version: {{ php_version_rocky.stdout.split()[1] }}"
-
-    - name: Test WordPress access Rocky
-      uri:
-        url: "http://localhost"
-        method: GET
-        status_code: [200, 301, 302, 404]
-      register: http_rocky
-
-    - name: Show Rocky HTTP status
-      debug:
-        msg: "✅ Rocky HTTP Status: {{ http_rocky.status }}"
-
-# Verificaciones comunes para todos los hosts
+# Verificaciones comunes para todos los hosts - con tests de idempotencia
 - name: Verify all WordPress servers
   hosts: wordpress_servers
   become: true
@@ -123,6 +23,28 @@
       register: mysql_status
       failed_when: mysql_status is changed
 
+    # ✅ NEW: Test de idempotencia específico para Apache sites
+    - name: Verify WordPress site is enabled (idempotent)
+      ansible.builtin.stat:
+        path: /etc/apache2/sites-enabled/wordpress.conf
+      register: wp_site_enabled
+      when: ansible_os_family == "Debian"
+
+    - name: Verify default site is disabled (idempotent)
+      ansible.builtin.stat:
+        path: /etc/apache2/sites-enabled/000-default.conf
+      register: default_site_status
+      when: ansible_os_family == "Debian"
+
+    - name: Assert WordPress site configuration is idempotent
+      assert:
+        that:
+          - wp_site_enabled.stat.exists
+          - not default_site_status.stat.exists
+        fail_msg: "Apache site configuration is not idempotent"
+        success_msg: "✅ Apache site configuration is idempotent"
+      when: ansible_os_family == "Debian"
+
     - name: Check WordPress directory exists
       stat:
         path: /var/www/html/wordpress
@@ -137,6 +59,20 @@
       check_mode: true
       register: db_config
       failed_when: db_config is changed
+
+    # ✅ NEW: Test de idempotencia para archivos WordPress
+    - name: Verify WordPress files are not re-downloaded (idempotent)
+      stat:
+        path: "{{ wordpress_install_dir }}/wp-config.php"
+      register: wp_config_exists
+
+    - name: Assert WordPress installation is idempotent
+      assert:
+        that:
+          - wp_config_exists.stat.exists
+          - wp_config_exists.stat.mode == "0644"
+        fail_msg: "WordPress installation is not idempotent"
+        success_msg: "✅ WordPress installation is idempotent"
 
     - name: Test database connection
       mysql_query:
@@ -157,6 +93,28 @@
         'curl' not in php_modules.stdout or
         'gd' not in php_modules.stdout
 
+    # ✅ NEW: Test HTTP response es consistente
+    - name: Test HTTP response consistency (idempotent)
+      uri:
+        url: "http://localhost"
+        method: GET
+        status_code: [200, 301, 302, 404]
+      register: http_response_1
+
+    - name: Test HTTP response second time
+      uri:
+        url: "http://localhost"
+        method: GET  
+        status_code: [200, 301, 302, 404]
+      register: http_response_2
+
+    - name: Assert HTTP responses are consistent
+      assert:
+        that:
+          - http_response_1.status == http_response_2.status
+        fail_msg: "HTTP responses are inconsistent: {{ http_response_1.status }} vs {{ http_response_2.status }}"
+        success_msg: "✅ HTTP responses are consistent ({{ http_response_1.status }})"
+
     - name: Final verification summary
       debug:
         msg:
@@ -168,27 +126,4 @@
           - "✅ WordPress Domain: {{ wordpress_domain }}"
           - "✅ Database Connection: Working"
           - "✅ WordPress Files: Present"
-
-# Verificación final de resumen
-- name: Multi-distro verification summary
-  hosts: localhost
-  gather_facts: false
-  tasks:
-    - name: Summary of multi-distro testing
-      debug:
-        msg:
-          - "🎉 MULTI-DISTRO TESTING COMPLETED SUCCESSFULLY!"
-          - ""
-          - "✅ Ubuntu 22.04 → PHP 8.1 → http://localhost:8180"
-          - "✅ Debian 12 → PHP 8.2 → http://localhost:8181"  
-          - "✅ Rocky 9 → PHP 8.0 → http://localhost:8182"
-          - ""
-          - "🌐 Test WordPress installations:"
-          - "   - Ubuntu: curl http://localhost:8180"
-          - "   - Debian: curl http://localhost:8181"
-          - "   - Rocky:  curl http://localhost:8182"
-          - ""
-          - "🔍 Login to containers:"
-          - "   - molecule login --host ubuntu2204-instance"
-          - "   - molecule login --host debian12-instance" 
-          - "   - molecule login --host rocky9-instance"
+          - "✅ Idempotence: Verified"

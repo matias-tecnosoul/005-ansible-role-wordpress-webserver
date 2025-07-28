@@ -4,7 +4,7 @@
 [![Galaxy](https://github.com/matias-tecnosoul/005-ansible-role-wordpress-webserver/workflows/Publish%20to%20Ansible%20Galaxy/badge.svg)](https://github.com/matias-tecnosoul/005-ansible-role-wordpress-webserver/actions)
 [![License](https://img.shields.io/github/license/matias-tecnosoul/005-ansible-role-wordpress-webserver)](https://github.com/matias-tecnosoul/005-ansible-role-wordpress-webserver/blob/main/LICENSE)
 
-Ansible role for complete WordPress webserver setup with **automatic PHP version detection** by distribution, Apache HTTP Server, and MySQL connectivity.
+Ansible role for **WordPress webserver setup only** with **automatic PHP version detection** by distribution, Apache HTTP Server configuration. **Database must be configured separately**.
 
 ## 🎯 Key Features
 
@@ -27,66 +27,29 @@ Ansible role for complete WordPress webserver setup with **automatic PHP version
 - Comprehensive error handling
 - Idempotent operations
 
-### ✅ **Comprehensive Testing**
-- **Molecule testing** with Docker scenarios
-- **Multi-distribution verification** (15+ checks)
-- **CI/CD integration** with GitHub Actions
-- **ansible-lint** and **yamllint** compliance
-
 ## 📋 Requirements
 
 - **Ansible** >= 2.12
 - **Python** >= 3.8
-- **Docker** >= 20.10 (for testing with Molecule)
 - **Target Systems**: Ubuntu, Debian, Rocky Linux
-
-## 🐳 **Docker Compatibility Fix**
-
-**Important**: Molecule has critical compatibility issues with different Docker versions. We provide a universal fix script:
-
-```bash
-# 1. Clone repository
-git clone https://github.com/matias-tecnosoul/005-ansible-role-wordpress-webserver.git
-cd 005-ansible-role-wordpress-webserver
-
-# 2. Setup Python environment
-python3.11 -m venv molecule-env
-source molecule-env/bin/activate
-pip install -r requirements-dev.txt
-
-# 3. Fix Docker compatibility (CRITICAL STEP)
-chmod +x fix-docker-universal.sh
-./fix-docker-universal.sh
-
-# 4. Install Galaxy dependencies
-ansible-galaxy install -r requirements.yml
-
-# 5. Verify everything works
-molecule list
-molecule test -s ubuntu
-```
-
-### **Why is the Docker fix needed?**
-
-**Different Docker versions require different Python SDK versions:**
-- **Docker 20.10.x** (Ubuntu 22.04) → `docker==6.1.3` 
-- **Docker 25.x-27.x** (Updated systems) → `docker==7.0.0`
-- **Docker 28.x+** (Manjaro/Arch) → `docker==7.0.0` + specific config
-
-**Without this fix**: `Not supported URL scheme http+docker` error prevents Molecule from working.
-
-### **Supported Platforms**
-| Platform | Docker Version | Auto-Config | Status |
-|----------|----------------|-------------|---------|
-| Ubuntu 22.04 | 20.10.x | `stable-lts` | ✅ Perfect |
-| Debian 12 | 20.10.x-24.x | `stable-lts` | ✅ Perfect |
-| Manjaro/Arch | 28.x+ | `bleeding-edge` | ✅ Fixed |
-| CentOS/RHEL | 24.x-27.x | `recent-stable` | ✅ Good |
+- **Database**: MySQL/MariaDB must be configured separately (see examples below)
 
 ## 🏗️ Dependencies
 
-This role depends on:
-- **`geerlingguy.mysql`** >= 5.0.0 (for database setup)
+### **No Required Role Dependencies**
+This role is designed to be **database-agnostic**. You can use it with:
+- `geerlingguy.mysql`
+- `geerlingguy.mariadb` 
+- External MySQL/PostgreSQL
+- Docker containers
+- Cloud databases (RDS, etc.)
+
+### **Required Collections**
+```yaml
+collections:
+  - community.general  # For apache2_module
+  - ansible.posix     # For firewalld, seboolean
+```
 
 ## 📦 Installation
 
@@ -109,7 +72,7 @@ ansible-galaxy role install git+https://github.com/matias-tecnosoul/005-ansible-
   become: yes
   
   vars:
-    # MySQL configuration
+    # MySQL configuration (for geerlingguy.mysql)
     mysql_root_password: "secure_root_password"
     mysql_databases:
       - name: wordpress_db
@@ -127,36 +90,51 @@ ansible-galaxy role install git+https://github.com/matias-tecnosoul/005-ansible-
     wordpress_db_password: wp_secure_password
   
   roles:
+    # 1. Setup database FIRST (user choice)
     - geerlingguy.mysql
+    
+    # 2. Setup webserver
     - matias_tecnosoul.wordpress_webserver
 ```
 
-### Advanced Configuration
+### Alternative Database Examples
+
+#### With MariaDB
 ```yaml
----
-- hosts: webservers
-  become: yes
-  
-  vars:
-    # WordPress customization
-    wordpress_install_dir: "/var/www/html/wordpress"
-    wordpress_debug: false
-    wordpress_table_prefix: "wp_"
-    
-    # PHP performance tuning
-    php_memory_limit: "512M"
-    php_max_execution_time: "300"
-    php_upload_max_filesize: "128M"
-    php_post_max_size: "128M"
-    
-    # Security keys (generate unique ones)
-    wordpress_auth_key: "your-unique-auth-key-here"
-    wordpress_secure_auth_key: "your-unique-secure-auth-key"
-    # ... more keys
-  
-  roles:
-    - geerlingguy.mysql
-    - matias_tecnosoul.wordpress_webserver
+roles:
+  - geerlingguy.mariadb
+  - matias_tecnosoul.wordpress_webserver
+```
+
+#### With External Database
+```yaml
+vars:
+  wordpress_db_host: "external-mysql.example.com"
+  wordpress_db_name: wordpress_db
+  wordpress_db_user: wp_user
+  wordpress_db_password: wp_secure_password
+
+roles:
+  - matias_tecnosoul.wordpress_webserver
+```
+
+#### With Docker MySQL
+```yaml
+pre_tasks:
+  - name: Start MySQL container
+    docker_container:
+      name: mysql-wordpress
+      image: mysql:8.0
+      env:
+        MYSQL_ROOT_PASSWORD: "{{ mysql_root_password }}"
+        MYSQL_DATABASE: "{{ wordpress_db_name }}"
+        MYSQL_USER: "{{ wordpress_db_user }}"
+        MYSQL_PASSWORD: "{{ wordpress_db_password }}"
+      ports:
+        - "3306:3306"
+
+roles:
+  - matias_tecnosoul.wordpress_webserver
 ```
 
 ## ⚙️ Role Variables
@@ -177,6 +155,9 @@ wordpress_version: "latest"                       # WordPress version
 wordpress_debug: false                            # Debug mode
 wordpress_table_prefix: "wp_"                     # Database table prefix
 
+# Database connection
+wordpress_db_host: "localhost"                    # Database host
+
 # PHP configuration (auto-detected by distribution)
 php_memory_limit: "256M"                          # PHP memory limit
 php_max_execution_time: "300"                     # Max execution time
@@ -189,48 +170,20 @@ wordpress_user: "www-data"                        # Web server user (auto-detect
 wordpress_group: "www-data"                       # Web server group (auto-detected)
 ```
 
-See [`defaults/main.yml`](defaults/main.yml) for all available variables and their default values.
+## 🧪 Testing with Different Database Setups
 
-## 🧪 Testing
-
-### Local Testing with Molecule
-
+### Testing with geerlingguy.mysql
 ```bash
-# 1. Setup development environment
-python3.11 -m venv molecule-env
-source molecule-env/bin/activate
-pip install -r requirements-dev.txt
-
-# 2. CRITICAL: Fix Docker compatibility
-./fix-docker-universal.sh
-
-# 3. Install Galaxy dependencies
-ansible-galaxy install -r requirements.yml
-
-# 4. Run multi-distribution testing
-molecule test
-
-# 5. Test specific distribution
-molecule create -s ubuntu
-molecule converge -s ubuntu
-molecule verify -s ubuntu
-molecule login -s ubuntu  # Debug if needed
-molecule destroy -s ubuntu
+# Test with MySQL
+molecule test -s ubuntu
 ```
 
-### Manual Testing
-After running the role, WordPress will be available at:
-- **Ubuntu**: http://localhost:8180
-- **Debian**: http://localhost:8181  
-- **Rocky**: http://localhost:8182
-
-## 🔄 CI/CD Integration
-
-This role includes comprehensive CI/CD with GitHub Actions:
-- **Automated testing** on Ubuntu 22.04, Debian 12, and Rocky Linux 9
-- **ansible-lint** and **yamllint** compliance checking
-- **Multi-distribution verification** with Molecule
-- **Automatic Galaxy publishing** on releases
+### Testing with external database
+```bash
+# Modify molecule/*/prepare.yml to use your database setup
+molecule create -s ubuntu
+molecule converge -s ubuntu
+```
 
 ## 📊 Supported Distributions
 
@@ -242,73 +195,28 @@ This role includes comprehensive CI/CD with GitHub Actions:
 | Debian | 11 (Bullseye) | 7.4 | ✅ Tested |
 | Rocky Linux | 9 | 8.0 | ✅ Tested |
 
-## 🏗️ Architecture
-
-### PHP Version Detection
-The role automatically detects and installs the appropriate PHP version:
-
-```yaml
-# tasks/detect-php-version.yml
-- name: Set PHP version based on distribution
-  set_fact:
-    php_version: >-
-      {%- if ansible_distribution == "Ubuntu" and ansible_distribution_version is version('22.04', '==') -%}
-        8.1
-      {%- elif ansible_distribution == "Debian" and ansible_distribution_version is version('12', '>=') -%}
-        8.2
-      {%- elif ansible_os_family == "RedHat" -%}
-        8.0
-      {%- else -%}
-        8.1
-      {%- endif -%}
-```
-
-### Directory Structure
-```
-roles/wordpress_webserver/
-├── defaults/           # Default variables
-├── handlers/           # Service handlers
-├── meta/              # Role metadata
-├── molecule/          # Testing scenarios
-├── tasks/             # Main role logic
-├── templates/         # Jinja2 templates
-├── vars/              # OS-specific variables
-├── fix-docker-universal.sh  # Docker compatibility fix
-└── README.md          # This file
-```
-
 ## 🐛 Troubleshooting
 
-### Docker Compatibility Issues
+### Database Connection Issues
 ```bash
-# Error: "Not supported URL scheme http+docker"
-./fix-docker-universal.sh
-
-# Error: "Permission denied" for Docker
-sudo usermod -aG docker $USER
-newgrep docker  # or logout/login
+# Test database connectivity from webserver
+mysql -h {{ wordpress_db_host }} -u {{ wordpress_db_user }} -p{{ wordpress_db_password }} {{ wordpress_db_name }}
 ```
 
-### Molecule Issues
+### WordPress Configuration
 ```bash
-# Role not found error
-molecule list  # Check if scenarios are detected
-ansible-config dump | grep ROLES_PATH  # Check role paths
-
-# Container creation fails
-docker ps  # Check if Docker daemon is running
-molecule destroy  # Clean up previous containers
+# Check wp-config.php
+cat /var/www/html/wordpress/wp-config.php | grep DB_
 ```
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/my-feature`
-3. **Run Docker compatibility fix**: `./fix-docker-universal.sh`
-4. Add tests for new functionality
-5. Run the test suite: `molecule test`
-6. Ensure ansible-lint compliance: `ansible-lint .`
-7. Submit a pull request
+3. Add tests for new functionality
+4. Run the test suite: `molecule test`
+5. Ensure ansible-lint compliance: `ansible-lint .`
+6. Submit a pull request
 
 ## 📝 License
 
@@ -320,6 +228,6 @@ Created by [Matias TecnoSoul](https://github.com/matias-tecnosoul)
 
 ## 🙏 Acknowledgments
 
-- [Jeff Geerling](https://github.com/geerlingguy) for the excellent `geerlingguy.mysql` role
 - The Ansible community for best practices and guidelines
 - [Molecule](https://molecule.readthedocs.io/) for testing framework
+- **Note**: Database setup examples use `geerlingguy.mysql` for demonstration only

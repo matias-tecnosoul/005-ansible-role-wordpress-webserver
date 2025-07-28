@@ -35,10 +35,10 @@ galaxy_info:
     - cms
     - lamp
 
-# ✅ CRÍTICO: Dependencies que Molecule debería usar automáticamente
-dependencies:
-  - role: geerlingguy.mysql
-    version: ">=5.0.0"
+# ✅ FIX: Remover dependency - dejar que el usuario decida
+# dependencies: []  # Sin dependencies obligatoriasdependencies:
+#  - role: geerlingguy.mysql
+#    version: ">=5.0.0"
 
 # ✅ CRÍTICO: Collections necesarias
 collections:
