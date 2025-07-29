@@ -7,7 +7,6 @@ exclude_paths:
   - .github/
   - molecule-env/
   - .vagrant/
-  - roles/geerlingguy.mysql/
 
 # Solo ignorar errores de formato menos críticos
 skip_list:

@@ -62,14 +62,6 @@ jobs:
           mkdir -p ~/.ansible/roles
           ansible-galaxy install -r requirements.yml --force
           
-          # Buscar y copiar geerlingguy.mysql
-          MYSQL_ROLE_PATH=$(find /home/runner -name "geerlingguy.mysql" -type d 2>/dev/null | head -1)
-          if [[ -n "$MYSQL_ROLE_PATH" ]]; then
-            cp -r "$MYSQL_ROLE_PATH" ~/.ansible/roles/
-          else
-            ansible-galaxy install geerlingguy.mysql -p ~/.ansible/roles --force
-          fi
-          
           ansible-galaxy role list
 
       - name: Run Molecule tests
@@ -77,3 +69,34 @@ jobs:
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
+  
+   publish-galaxy:
+    name: Publish to Ansible Galaxy
+    runs-on: ubuntu-22.04
+    needs: test
+    # Only publish on main branch or releases
+    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Publish to Galaxy
+        uses: robertdebock/galaxy-action@1.2.1
+        with:
+          galaxy_api_key: ${{ secrets.GALAXY_API_KEY }}
+          git_branch: main
+          galaxy_disable_retry: false
+
+      - name: Publish success notification
+        if: success()
+        run: |
+          echo "🎉 Successfully published to Ansible Galaxy!"
+          echo "🌟 Role: https://galaxy.ansible.com/ui/standalone/roles/matias-tecnosoul/wordpress_webserver/"
+          echo "📦 Version: $(git describe --tags --always)"
+
+      - name: Publish failure notification  
+        if: failure()
+        run: |
+          echo "❌ Failed to publish to Galaxy"
+          echo "🔍 Check Galaxy API key and permissions"

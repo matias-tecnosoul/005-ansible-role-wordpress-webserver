@@ -35,4 +35,3 @@ ignore: |
   molecule-env/
   .vagrant/
   .ansible-deps/
-  roles/geerlingguy.mysql/
