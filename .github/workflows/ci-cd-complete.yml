@@ -57,7 +57,6 @@ jobs:
           pip install -r requirements-dev.txt
 
       # ✅ FIX: Install testing dependencies BEFORE running molecule
-      # ✅ WORKING FIX: Install testing dependencies BEFORE running molecule
       - name: Install testing dependencies
         run: |
           echo "📦 Installing testing dependencies for scenario: ${{ matrix.scenario }}"
@@ -93,7 +92,7 @@ jobs:
           # Show ansible config
           echo "📋 Ansible roles path:"
           ansible-config dump | grep DEFAULT_ROLES_PATH || echo "No roles path config"
-          
+
       - name: Run Molecule tests
         run: molecule test -s ${{ matrix.scenario }}
         env:
