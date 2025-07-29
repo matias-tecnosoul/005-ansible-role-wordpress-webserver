@@ -1,5 +1,4 @@
----
-name: CI/CD - Test and Publish
+name: CI/CD - Complete Pipeline
 
 on:
   push:
@@ -23,7 +22,7 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install stable compatible versions
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
@@ -57,24 +56,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
-      - name: Install Galaxy dependencies for CI
+      - name: Install testing dependencies
         run: |
-          mkdir -p ~/.ansible/roles
-          ansible-galaxy install -r requirements.yml --force
-          
-          ansible-galaxy role list
+          ansible-galaxy install -r molecule/${{ matrix.scenario }}/requirements.yml --force
 
       - name: Run Molecule tests
         run: molecule test -s ${{ matrix.scenario }}
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
-  
-   publish-galaxy:
+
+  publish:
     name: Publish to Ansible Galaxy
     runs-on: ubuntu-22.04
     needs: test
-    # Only publish on main branch or releases
     if: github.ref == 'refs/heads/main' || github.event_name == 'release'
     
     steps:
@@ -86,17 +81,9 @@ jobs:
         with:
           galaxy_api_key: ${{ secrets.GALAXY_API_KEY }}
           git_branch: main
-          galaxy_disable_retry: false
 
-      - name: Publish success notification
+      - name: Notify success
         if: success()
         run: |
-          echo "🎉 Successfully published to Ansible Galaxy!"
-          echo "🌟 Role: https://galaxy.ansible.com/ui/standalone/roles/matias-tecnosoul/wordpress_webserver/"
-          echo "📦 Version: $(git describe --tags --always)"
-
-      - name: Publish failure notification  
-        if: failure()
-        run: |
-          echo "❌ Failed to publish to Galaxy"
-          echo "🔍 Check Galaxy API key and permissions"
+          echo "✅ Successfully published to Ansible Galaxy!"
+          echo "🌟 https://galaxy.ansible.com/ui/standalone/roles/matias-tecnosoul/wordpress_webserver/"
