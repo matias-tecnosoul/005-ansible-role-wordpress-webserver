@@ -1,4 +1,3 @@
----
 name: CI/CD - Test and Publish
 
 on:
@@ -57,9 +56,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
 
+      # ✅ FIX: Install testing dependencies BEFORE running molecule
       - name: Install testing dependencies
         run: |
-          ansible-galaxy install -r molecule/${{ matrix.scenario }}/requirements.yml --force
+          echo "Installing testing dependencies for scenario: ${{ matrix.scenario }}"
+          
+          # Install from scenario-specific requirements.yml
+          if [ -f "molecule/${{ matrix.scenario }}/requirements.yml" ]; then
+            echo "Found requirements.yml for ${{ matrix.scenario }}"
+            ansible-galaxy install -r molecule/${{ matrix.scenario }}/requirements.yml --force
+          else
+            echo "No requirements.yml found for ${{ matrix.scenario }}, using default"
+            # Fallback: install geerlingguy.mysql directly
+            ansible-galaxy install geerlingguy.mysql --force
+          fi
+          
+          # Verify installation
+          ansible-galaxy role list | grep mysql || echo "MySQL role not found"
 
       - name: Run Molecule tests
         run: molecule test -s ${{ matrix.scenario }}
