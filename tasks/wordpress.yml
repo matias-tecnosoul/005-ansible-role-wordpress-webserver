@@ -84,7 +84,7 @@
         backup: true
       notify: restart apache2
 
-    # ✅ FIX: Usar módulo apache2_module para idempotencia
+    # FIX: Usar módulo apache2_module para idempotencia
     - name: "Verificar si sitio WordPress está habilitado"
       ansible.builtin.stat:
         path: /etc/apache2/sites-enabled/wordpress.conf
