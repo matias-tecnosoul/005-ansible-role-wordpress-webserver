@@ -57,23 +57,43 @@ jobs:
           pip install -r requirements-dev.txt
 
       # ✅ FIX: Install testing dependencies BEFORE running molecule
+      # ✅ WORKING FIX: Install testing dependencies BEFORE running molecule
       - name: Install testing dependencies
         run: |
-          echo "Installing testing dependencies for scenario: ${{ matrix.scenario }}"
+          echo "📦 Installing testing dependencies for scenario: ${{ matrix.scenario }}"
+          
+          # Create roles directory for dependencies
+          mkdir -p ~/.ansible/roles
           
           # Install from scenario-specific requirements.yml
           if [ -f "molecule/${{ matrix.scenario }}/requirements.yml" ]; then
-            echo "Found requirements.yml for ${{ matrix.scenario }}"
-            ansible-galaxy install -r molecule/${{ matrix.scenario }}/requirements.yml --force
+            echo "📋 Found requirements.yml for ${{ matrix.scenario }}"
+            cat molecule/${{ matrix.scenario }}/requirements.yml
+            
+            # Install roles to global ansible location
+            ansible-galaxy install -r molecule/${{ matrix.scenario }}/requirements.yml -p ~/.ansible/roles --force
+            
+            # Also install to local roles/ for molecule to find
+            ansible-galaxy install -r molecule/${{ matrix.scenario }}/requirements.yml -p ./roles --force
+            
           else
-            echo "No requirements.yml found for ${{ matrix.scenario }}, using default"
+            echo "⚠️  No requirements.yml found for ${{ matrix.scenario }}"
             # Fallback: install geerlingguy.mysql directly
-            ansible-galaxy install geerlingguy.mysql --force
+            ansible-galaxy install geerlingguy.mysql -p ~/.ansible/roles --force
+            ansible-galaxy install geerlingguy.mysql -p ./roles --force
           fi
           
           # Verify installation
-          ansible-galaxy role list | grep mysql || echo "MySQL role not found"
-
+          echo "🔍 Verification:"
+          echo "Global roles:"
+          ansible-galaxy role list | grep mysql || echo "No MySQL in global"
+          echo "Local roles:"
+          ls -la ./roles/ || echo "No local roles directory"
+          
+          # Show ansible config
+          echo "📋 Ansible roles path:"
+          ansible-config dump | grep DEFAULT_ROLES_PATH || echo "No roles path config"
+          
       - name: Run Molecule tests
         run: molecule test -s ${{ matrix.scenario }}
         env:

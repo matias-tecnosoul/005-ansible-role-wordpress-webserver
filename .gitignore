@@ -94,3 +94,6 @@ roles/geerlingguy.mysql/
 # Galaxy symlinks and role downloads  
 matias-tecnosoul.wordpress_webserver
 roles/matias-tecnosoul.wordpress_webserver/
+
+# Local testing dependencies
+roles/geerlingguy.mysql/
