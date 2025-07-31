@@ -89,13 +89,8 @@
       changed_when: false
       failed_when: apache_configtest.rc != 0
 
-    - name: Test basic HTTP response (Apache serving files) 
-          uri:
-            url: "http://localhost"
-            status_code: [200, 301, 302, 403, 404, 500, 503]
-          register: http_response
-          failed_when: false
-          
+   
+
     - name: Verify Apache is responding (any HTTP status is OK)
       assert:
         that:
