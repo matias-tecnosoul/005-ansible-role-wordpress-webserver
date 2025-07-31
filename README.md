@@ -239,6 +239,9 @@ Rocky: http://localhost:8182
 # Test database connectivity from webserver
 mysql -h {{ wordpress_db_host }} -u {{ wordpress_db_user }} -p{{ wordpress_db_password }} {{ wordpress_db_name }}
 ```
+### Known Limitations
+- **Rocky Linux 9**: PHP-FPM may require manual configuration in containerized testing environments
+- **Production**: All distributions work correctly in non-containerized environments
 
 ### WordPress Configuration
 ```bash

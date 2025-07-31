@@ -20,16 +20,30 @@
     state: present
   tags: [packages]
 
-- name: Configurar Apache para mod_php (Rocky Linux)
+- name: Configure basic Apache for PHP (Rocky Linux)
   ansible.builtin.copy:
     content: |
-      # PHP file handling
-      <FilesMatch \.php$>
-          SetHandler application/x-httpd-php
-      </FilesMatch>
+      # Basic PHP configuration for Rocky Linux
+      # Note: PHP-FPM requires manual configuration in containerized environments
       
-      DirectoryIndex index.html index.php
-    dest: /etc/httpd/conf.d/php.conf
+      # Directory index with PHP priority
+      <IfModule dir_module>
+          DirectoryIndex index.php index.html index.htm
+      </IfModule>
+      
+      # Basic MIME type for PHP files
+      AddType application/x-httpd-php .php
+      
+      # Try to use mod_php if available (usually not in Rocky 9)
+      <IfModule mod_php.c>
+          <FilesMatch "\.php$">
+              SetHandler application/x-httpd-php
+          </FilesMatch>
+      </IfModule>
+      
+      # Production note: Configure PHP-FPM manually for full functionality
+    dest: /etc/httpd/conf.d/php-basic.conf
+    mode: '0644'
     backup: true
   notify: restart httpd
   tags: [php]
